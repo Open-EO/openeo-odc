@@ -1,0 +1,2390 @@
+{
+  "links": [],
+  "processes": [
+    {
+      "id": "ard_normalized_radar_backscatter",
+      "summary": "CARD4L compliant SAR NRB generation",
+      "description": "Computes CARD4L compliant backscatter (gamma0) from SAR input.\n\nNote that backscatter computation may require instrument specific metadata that is tightly coupled to the original SAR products. As a result, this process may only work in combination with loading data from specific collections, not with general data cubes.",
+      "categories": [
+          "cubes",
+          "sar",
+          "ard"
+      ],
+      "experimental": true,
+      "parameters": [
+          {
+              "name": "data",
+              "description": "The source data cube containing SAR input.",
+              "schema": {
+                  "subtype": "raster-cube",
+                  "type": "object"
+              }
+          },
+          {
+              "name": "elevation_model",
+              "description": "The digital elevation model to use. Set to `null` (the default) to allow the back-end to choose, which will improve portability, but reduce reproducibility.",
+              "optional": true,
+              "default": null,
+              "schema": [
+                  {
+                      "type": "string",
+                      "subtype": "collection-id"
+                  },
+                  {
+                      "type": "cop-dem-30m"
+                  }
+              ]
+          },
+          {
+              "name": "ellipsoid_incidence_angle",
+              "description": "If set to `true`, an ellipsoidal incidence angle band named `ellipsoid_incidence_angle` is added. The values are given in degrees.",
+              "optional": true,
+              "default": false,
+              "schema": {
+                  "type": "boolean"
+              }
+          },
+          {
+              "name": "noise_removal",
+              "description": "If set to `false`, no noise removal is applied. Defaults to `true`, which removes noise.",
+              "optional": true,
+              "default": true,
+              "schema": {
+                  "type": "boolean"
+              }
+          }
+      ],
+      "returns": {
+          "description": "Backscatter values expressed as gamma0. The data returned is CARD4L compliant and contains metadata.\n\nBy default, the backscatter values are given in linear scale.",
+          "schema": {
+              "subtype": "raster-cube",
+              "type": "object"
+          }
+      },
+      "exceptions": {
+          "DigitalElevationModelInvalid": {
+              "message": "The digital elevation model specified is either not a DEM or can't be used with the data cube given."
+          }
+      },
+      "links": [
+          {
+              "rel": "about",
+              "href": "http://ceos.org/ard/files/PFS/NRB/v5.0/CARD4L-PFS_Normalised_Radar_Backscatter-v5.0.pdf",
+              "title": "CEOS CARD4L specification"
+          }
+      ],
+      "process_graph": {
+          "nrb": {
+              "process_id": "sar_backscatter",
+              "arguments": {
+                  "data": {
+                      "from_parameter": "data"
+                  },
+                  "coefficient": "gamma0-terrain",
+                  "elevation_model": {
+                      "from_parameter": "elevation_model"
+                  },
+                  "mask": true,
+                  "contributing_area": true,
+                  "local_incidence_angle": true,
+                  "ellipsoid_incidence_angle": {
+                      "from_parameter": "ellipsoid_incidence_angle"
+                  },
+                  "noise_removal": {
+                      "from_parameter": "noise_removal"
+                  }
+              },
+              "result": true
+          }
+      }
+    },
+    {
+      "id": "ard_surface_reflectance",
+      "summary": "CARD4L compliant Surface Reflectance generation",
+      "description": "Computes CARD4L compliant surface reflectance values from optical input.",
+      "categories": [
+          "cubes",
+          "sar",
+          "ard"
+      ],
+      "experimental": true,
+      "parameters": [
+          {
+              "description": "The source data cube containing multi-spectral optical top of the atmosphere (TOA) reflectances. There must be a single dimension of type bands available.",
+              "name": "data",
+              "schema": {
+                  "subtype": "raster-cube",
+                  "type": "object"
+              }
+          },
+          {
+              "description": "The atmospheric correction method to use.",
+              "name": "atmospheric_correction_method",
+              "schema": {
+                  "type": [
+                      "string"
+                  ],
+                  "enum": [
+                      "FORCE",
+                      "iCOR"
+                  ]
+              }
+          },
+          {
+              "description": "The cloud detection method to use.",
+              "name": "cloud_detection_method",
+              "schema": {
+                  "type": [
+                      "string"
+                  ],
+                  "enum": [
+                      "Fmask"
+                  ]
+              }
+          },
+          {
+              "description": "The digital elevation model to use, leave empty to allow the back-end to make a suitable choice.",
+              "name": "elevation_model",
+              "optional": true,
+              "default": null,
+              "schema": [
+                  {
+                      "type": "string",
+                      "subtype": "collection-id"
+                  },
+                  {
+                      "type": "cop-dem-30m"
+                  }
+              ]
+          }
+      ],
+      "returns": {
+          "description": "Data cube containing bottom of atmosphere reflectances with atmospheric disturbances like clouds and cloud shadows removed. The data returned is CARD4L compliant and contains metadata.",
+          "schema": {
+              "subtype": "raster-cube",
+              "type": "object"
+          }
+      },
+      "links": [
+          {
+              "rel": "about",
+              "href": "http://ceos.org/ard/files/PFS/SR/v5.0/CARD4L_Product_Family_Specification_Surface_Reflectance-v5.0.pdf",
+              "title": "CEOS CARD4L specification"
+          }
+      ]
+    },
+    {
+      "id": "atmospheric_correction",
+      "summary": "Apply atmospheric correction",
+      "description": "Applies an atmospheric correction that converts top of atmosphere reflectance values into bottom of atmosphere/top of canopy reflectance values.",
+      "categories": [
+          "cubes",
+          "optical"
+      ],
+      "experimental": true,
+      "parameters": [
+          {
+              "description": "Data cube containing multi-spectral optical top of atmosphere reflectances to be corrected.",
+              "name": "data",
+              "schema": {
+                  "subtype": "raster-cube",
+                  "type": "object"
+              }
+          },
+          {
+              "description": "The atmospheric correction method to use. To get reproducible results, you have to set a specific method.\n\nSet to `null` to allow the back-end to choose, which will improve portability, but reduce reproducibility as you *may* get different results if you run the processes multiple times.",
+              "name": "method",
+              "schema": [
+                  {
+                      "type": [
+                          "string"
+                      ],
+                      "enum": [
+                          "FORCE"
+                      ]
+                  },
+                  {
+                      "type": "null"
+                  }
+              ]
+          },
+          {
+              "description": "The digital elevation model to use, leave empty to allow the back-end to make a suitable choice.",
+              "name": "elevation_model",
+              "optional": true,
+              "default": null,
+              "schema": [
+                  {
+                      "type": "string",
+                      "subtype": "collection-id"
+                  },
+                  {
+                      "type": "cop-dem-30m"
+                  }
+              ]
+          }
+      ],
+      "returns": {
+          "description": "Data cube containing bottom of atmosphere reflectances.",
+          "schema": {
+              "subtype": "raster-cube",
+              "type": "object"
+          }
+      },
+      "exceptions": {
+          "DigitalElevationModelInvalid": {
+              "message": "The digital elevation model specified is either not a DEM or can't be used with the data cube given."
+          }
+      },
+      "links": [
+          {
+              "rel": "about",
+              "href": "https://bok.eo4geo.eu/IP1-7-1",
+              "title": "Atmospheric correction explained by EO4GEO body of knowledge."
+          }
+      ]
+    },
+    {
+      "id": "sar_backscatter",
+      "summary": "Computes backscatter from SAR input",
+      "description": "Computes backscatter from SAR input.\n\nNote that backscatter computation may require instrument specific metadata that is tightly coupled to the original SAR products. As a result, this process may only work in combination with loading data from specific collections, not with general data cubes.",
+      "categories": [
+          "cubes",
+          "sar"
+      ],
+      "experimental": true,
+      "parameters": [
+          {
+              "name": "data",
+              "description": "The source data cube containing SAR input.",
+              "schema": {
+                  "subtype": "raster-cube",
+                  "type": "object"
+              }
+          },
+          {
+              "name": "coefficient",
+              "description": "Select the radiometric correction coefficient. The following options are available:\n\n* `beta0`: radar brightness\n* `sigma0-ellipsoid`: ground area computed with ellipsoid earth model\n* `sigma0-terrain`: ground area computed with terrain earth model\n* `gamma0-ellipsoid`: ground area computed with ellipsoid earth model in sensor line of sight\n* `gamma0-terrain`: ground area computed with terrain earth model in sensor line of sight (default)\n* `null`: non-normalized backscatter",
+              "optional": true,
+              "default": "gamma0-terrain",
+              "schema": [
+                  {
+                      "type": "string",
+                      "enum": [
+                          "beta0",
+                          "sigma0-ellipsoid",
+                          "sigma0-terrain",
+                          "gamma0-ellipsoid",
+                          "gamma0-terrain"
+                      ]
+                  },
+                  {
+                      "title": "Non-normalized backscatter",
+                      "type": "null"
+                  }
+              ]
+          },
+          {
+              "name": "elevation_model",
+              "description": "The digital elevation model to use. Set to `null` (the default) to allow the back-end to choose, which will improve portability, but reduce reproducibility.",
+              "optional": true,
+              "default": null,
+              "schema": [
+                  {
+                      "type": "string",
+                      "subtype": "collection-id"
+                  },
+                  {
+                      "type": "cop-dem-30m"
+                  }
+              ]
+          },
+          {
+              "name": "mask",
+              "description": "If set to `true`, a data mask is added to the bands with the name `mask`. It indicates which values are valid (1), invalid (0) or contain no-data (null).",
+              "optional": true,
+              "default": false,
+              "schema": {
+                  "type": "boolean"
+              }
+          },
+          {
+              "name": "contributing_area",
+              "description": "If set to `true`, a DEM-based local contributing area band named `contributing_area` is added. The values are given in square meters.",
+              "optional": true,
+              "default": false,
+              "schema": {
+                  "type": "boolean"
+              }
+          },
+          {
+              "name": "local_incidence_angle",
+              "description": "If set to `true`, a DEM-based local incidence angle band named `local_incidence_angle` is added. The values are given in degrees.",
+              "optional": true,
+              "default": false,
+              "schema": {
+                  "type": "boolean"
+              }
+          },
+          {
+              "name": "ellipsoid_incidence_angle",
+              "description": "If set to `true`, an ellipsoidal incidence angle band named `ellipsoid_incidence_angle` is added. The values are given in degrees.",
+              "optional": true,
+              "default": false,
+              "schema": {
+                  "type": "boolean"
+              }
+          },
+          {
+              "name": "noise_removal",
+              "description": "If set to `false`, no noise removal is applied. Defaults to `true`, which removes noise.",
+              "optional": true,
+              "default": true,
+              "schema": {
+                  "type": "boolean"
+              }
+          }
+      ],
+      "returns": {
+          "description": "Backscatter values corresponding to the chosen parametrization.\n\nBy default, the backscatter values are given in linear scale.",
+          "schema": {
+              "subtype": "raster-cube",
+              "type": "object"
+          }
+      },
+      "exceptions": {
+          "DigitalElevationModelInvalid": {
+              "message": "The digital elevation model specified is either not a DEM or can't be used with the data cube given."
+          }
+      },
+      "links": [
+          {
+              "rel": "about",
+              "href": "https://bok.eo4geo.eu/PP2-2-4-3",
+              "title": "Gamma nought (0) explained by EO4GEO body of knowledge."
+          },
+          {
+              "rel": "about",
+              "href": "https://bok.eo4geo.eu/PP2-2-4-2",
+              "title": "Sigma nought (0) explained by EO4GEO body of knowledge."
+          },
+          {
+              "rel": "about",
+              "href": "https://www.geo.uzh.ch/microsite/rsl-documents/research/publications/peer-reviewed-articles/201108-TGRS-Small-tcGamma-3809999360/201108-TGRS-Small-tcGamma.pdf",
+              "title": "Flattening Gamma: Radiometric Terrain Correction for SAR Imagery"
+          }
+      ]
+    },
+    {
+      "categories": [
+        "cubes",
+        "import"
+      ],
+      "deprecated": false,
+      "description": "Loads a collection from the current back-end by its id and returns it as processable data cube. The data that is added to the data cube can be restricted with the additional `spatial_extent`, `temporal_extent`, `bands` and `properties`.\n\n**Remarks:**\n\n* The bands (and all dimensions that specify nominal dimension labels) are expected to be ordered as specified in the metadata if the `bands` parameter is set to `null`.\n* If no additional parameter is specified this would imply that the whole data set is expected to be loaded. Due to the large size of many data sets this is not recommended and may be optimized by back-ends to only load the data that is actually required after evaluating subsequent processes such as filters. This means that the pixel values should be processed only after the data has been limited to the required extents and as a consequence also to a manageable size.",
+      "exceptions": {},
+      "experimental": false,
+      "id": "load_collection",
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "The collection id.",
+          "experimental": false,
+          "name": "id",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "pattern": "^[\\w\\-\\.~/]+$",
+            "subtype": "collection-id",
+            "type": "string"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "Limits the data to load from the collection to the specified bounding box or polygons.\n\nThe process puts a pixel into the data cube if the point at the pixel center intersects with the bounding box or any of the polygons (as defined in the Simple Features standard by the OGC).\n\nThe GeoJSON can be one of the following GeoJSON types:\n\n* A `Polygon` geometry,\n* a `GeometryCollection` containing Polygons,\n* a `Feature` with a `Polygon` geometry or\n* a `FeatureCollection` containing `Feature`s with a `Polygon` geometry.\n\nSet this parameter to `null` to set no limit for the spatial extent. Be careful with this when loading large datasets!",
+          "experimental": false,
+          "name": "spatial_extent",
+          "optional": false,
+          "schema": [
+            {
+              "minItems": 0,
+              "properties": {
+                "base": {
+                  "default": null,
+                  "description": "Base (optional, lower left corner, coordinate axis 3).",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "crs": {
+                  "anyOf": [
+                    {
+                      "examples": [
+                        3857
+                      ],
+                      "minimum": 1000,
+                      "subtype": "epsg-code",
+                      "title": "EPSG Code",
+                      "type": "integer"
+                    },
+                    {
+                      "subtype": "wkt2-definition",
+                      "title": "WKT2",
+                      "type": "string"
+                    },
+                    {
+                      "deprecated": true,
+                      "subtype": "proj-definition",
+                      "title": "PROJ definition",
+                      "type": "string"
+                    }
+                  ],
+                  "default": 4326,
+                  "description": "Coordinate reference system of the extent, specified as as [EPSG code](http://www.epsg-registry.org/), [WKT2 (ISO 19162) string](http://docs.opengeospatial.org/is/18-010r7/18-010r7.html) or [PROJ definition (deprecated)](https://proj.org/usage/quickstart.html). Defaults to `4326` (EPSG code 4326) unless the client explicitly requests a different coordinate reference system."
+                },
+                "east": {
+                  "description": "East (upper right corner, coordinate axis 1).",
+                  "type": "number"
+                },
+                "height": {
+                  "default": null,
+                  "description": "Height (optional, upper right corner, coordinate axis 3).",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "north": {
+                  "description": "North (upper right corner, coordinate axis 2).",
+                  "type": "number"
+                },
+                "south": {
+                  "description": "South (lower left corner, coordinate axis 2).",
+                  "type": "number"
+                },
+                "west": {
+                  "description": "West (lower left corner, coordinate axis 1).",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "west",
+                "south",
+                "east",
+                "north"
+              ],
+              "subtype": "bounding-box",
+              "title": "Bounding Box",
+              "type": "object"
+            },
+            {
+              "minItems": 0,
+              "subtype": "geojson",
+              "title": "GeoJSON",
+              "type": "object"
+            },
+            {
+              "description": "Don't filter spatially. All data is included in the data cube.",
+              "minItems": 0,
+              "title": "No filter",
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "deprecated": false,
+          "description": "Limits the data by metadata properties to include only data in the data cube which all given conditions return `true` for (AND operation).\n\nSpecify key-value-pairs with the key being the name of the metadata property, which can be retrieved with the openEO Data Discovery for Collections. The value must a condition (user-defined process) to be evaluated against the collection metadata, see the example.",
+          "experimental": false,
+          "name": "properties",
+          "optional": true,
+          "schema": [
+            {
+              "additionalProperties": {
+                "parameters": [
+                  {
+                    "description": "The property value to be checked against.",
+                    "name": "value",
+                    "schema": {
+                      "description": "Any data type."
+                    }
+                  }
+                ],
+                "subtype": "process-graph",
+                "type": "object"
+              },
+              "description": "A list of filters to check against. Specify key-value-pairs with the key being the name of the metadata property name and the value being a process evaluated against the metadata values.",
+              "minItems": 0,
+              "subtype": "metadata-filter",
+              "title": "Filters",
+              "type": "object"
+            },
+            {
+              "description": "Don't filter by metadata properties.",
+              "minItems": 0,
+              "title": "No filter",
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "deprecated": false,
+          "description": "Limits the data to load from the collection to the specified left-closed temporal interval. Applies to all temporal dimensions. The interval has to be specified as an array with exactly two elements:\n\n1. The first element is the start of the temporal interval. The specified instance in time is **included** in the interval.\n2. The second element is the end of the temporal interval. The specified instance in time is **excluded** from the interval.\n\nThe specified temporal strings follow [RFC 3339](https://tools.ietf.org/html/rfc3339). Also supports open intervals by setting one of the boundaries to `null`, but never both.\n\nSet this parameter to `null` to set no limit for the spatial extent. Be careful with this when loading large datasets!",
+          "experimental": false,
+          "name": "temporal_extent",
+          "optional": false,
+          "schema": [
+            {
+              "examples": [
+                [
+                  "2015-01-01T00:00:00Z",
+                  "2016-01-01T00:00:00Z"
+                ],
+                [
+                  "2015-01-01",
+                  "2016-01-01"
+                ]
+              ],
+              "items": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "subtype": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "format": "date",
+                    "subtype": "date",
+                    "type": "string"
+                  },
+                  {
+                    "maxLength": 4,
+                    "minLength": 4,
+                    "pattern": "^\\d{4}$",
+                    "subtype": "year",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "subtype": "temporal-interval",
+              "type": "array"
+            },
+            {
+              "description": "Don't filter temporally. All data is included in the data cube.",
+              "minItems": 0,
+              "title": "No filter",
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "deprecated": false,
+          "description": "Only adds the specified bands into the data cube so that bands that don't match the list of band names are not available. Applies to all dimensions of type `bands`.\n\nEither the unique band name (metadata field `name` in bands) or one of the common band names (metadata field `common_name` in bands) can be specified. If unique band name and common name conflict, the unique band name has higher priority.\n\nThe order of the specified array defines the order of the bands in the data cube. f multiple bands match a common name, all matched bands are included in the original order.",
+          "experimental": false,
+          "name": "bands",
+          "optional": true,
+          "schema": [
+            {
+              "items": {
+                "subtype": "band-name",
+                "type": "string"
+              },
+              "minItems": 0,
+              "type": "array"
+            },
+            {
+              "description": "Don't filter bands. All bands are included in the data cube.",
+              "minItems": 0,
+              "title": "No filter",
+              "type": "null"
+            }
+          ]
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "A data cube for further processing. The dimensions and dimension properties (name, type, labels, reference system and resolution) correspond to the collection's metadata, but the dimension labels are restricted as specified in the parameters.",
+        "schema": {
+          "minItems": 0,
+          "subtype": "raster-cube",
+          "type": "object"
+        }
+      },
+      "summary": "Load a collection"
+    },
+    {
+      "categories": [
+        "cubes"
+      ],
+      "deprecated": false,
+      "description": "Adds a new named dimension to the data cube.\n\nAfterwards, the dimension can be referenced with the specified `name`. If a dimension with the specified name exists, the process fails with a `DimensionExists` error. The dimension label of the dimension is set to the specified `label`.",
+      "exceptions": {
+        "DimensionExists": {
+          "http": 400,
+          "message": "A dimension with the specified name already exists."
+        }
+      },
+      "experimental": false,
+      "id": "add_dimension",
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "A data cube to add the dimension to.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "raster-cube",
+            "type": "object"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "Name for the dimension.",
+          "experimental": false,
+          "name": "name",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": "string"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "A dimension label.",
+          "experimental": false,
+          "name": "label",
+          "optional": false,
+          "schema": [
+            {
+              "minItems": 0,
+              "type": "number"
+            },
+            {
+              "minItems": 0,
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "default": "other",
+          "deprecated": false,
+          "description": "The type of dimension, defaults to `other`.",
+          "experimental": false,
+          "name": "type",
+          "optional": true,
+          "schema": {
+            "enum": [
+              "spatial",
+              "temporal",
+              "bands",
+              "other"
+            ],
+            "minItems": 0,
+            "type": "string"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The data cube with a newly added dimension. The new dimension has exactly one dimension label. All other dimensions remain unchanged.",
+        "schema": {
+          "minItems": 0,
+          "subtype": "raster-cube",
+          "type": "object"
+        }
+      },
+      "summary": "Add a new dimension"
+    },
+    {
+      "categories": [
+        "cubes"
+      ],
+      "deprecated": false,
+      "description": "Applies a *unary* process to each pixel value in the data cube (i.e. a local operation). A unary process takes a single value and returns a single value, for example ``abs()`` or ``linear_scale_range()``. In contrast, the process ``apply_dimension()`` applies a process to all pixel values along a particular dimension.",
+      "exceptions": {},
+      "experimental": false,
+      "id": "apply",
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "A data cube.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "raster-cube",
+            "type": "object"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "A unary process to be applied on each value, may consist of multiple sub-processes.",
+          "experimental": false,
+          "name": "process",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "parameters": [
+              {
+                "deprecated": false,
+                "description": "The value to process.",
+                "experimental": false,
+                "name": "x",
+                "optional": false,
+                "schema": {
+                  "description": "Any data type.",
+                  "minItems": 0
+                }
+              },
+              {
+                "deprecated": false,
+                "description": "Additional data passed by the user.",
+                "experimental": false,
+                "name": "context",
+                "optional": true,
+                "schema": {
+                  "description": "Any data type.",
+                  "minItems": 0
+                }
+              }
+            ],
+            "subtype": "process-graph",
+            "type": "object"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "Additional data to be passed to the process.",
+          "experimental": false,
+          "name": "context",
+          "optional": true,
+          "schema": {
+            "description": "Any data type.",
+            "minItems": 0
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "A data cube with the newly computed values and the same dimensions. The dimension properties (name, type, labels, reference system and resolution) remain unchanged.",
+        "schema": {
+          "minItems": 0,
+          "subtype": "raster-cube",
+          "type": "object"
+        }
+      },
+      "summary": "Apply a process to each pixel"
+    },
+    {
+      "categories": [
+        "arrays",
+        "reducer"
+      ],
+      "deprecated": false,
+      "description": "Returns the element with the specified index or label from the array.\n\nEither the parameter `index` or `label` must be specified, otherwise the `ArrayElementParameterMissing` exception is thrown. If both parameters are set the `ArrayElementParameterConflict` exception is thrown.",
+      "examples": [
+        {
+          "arguments": {
+            "data": [
+              9,
+              8,
+              7,
+              6,
+              5
+            ],
+            "index": 2
+          },
+          "returns": 7
+        },
+        {
+          "arguments": {
+            "data": [
+              "A",
+              "B",
+              "C"
+            ],
+            "index": 0
+          },
+          "returns": "A"
+        },
+        {
+          "arguments": {
+            "data": [],
+            "index": 0,
+            "return_nodata": true
+          },
+          "returns": null
+        }
+      ],
+      "exceptions": {
+        "ArrayElementNotAvailable": {
+          "http": 400,
+          "message": "The array has no element with the specified index or label."
+        },
+        "ArrayElementParameterConflict": {
+          "http": 400,
+          "message": "The process 'array_element' only allows that either the 'index' or the 'labels' parameter is set."
+        },
+        "ArrayElementParameterMissing": {
+          "http": 400,
+          "message": "The process 'array_element' requires either the 'index' or 'labels' parameter to be set."
+        }
+      },
+      "experimental": false,
+      "id": "array_element",
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "An array.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "items": {
+              "description": "Any data type is allowed."
+            },
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The zero-based index of the element to retrieve.",
+          "experimental": false,
+          "name": "index",
+          "optional": true,
+          "schema": {
+            "minItems": 0,
+            "type": "integer"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The label of the element to retrieve.",
+          "experimental": false,
+          "name": "label",
+          "optional": true,
+          "schema": [
+            {
+              "minItems": 0,
+              "type": "number"
+            },
+            {
+              "minItems": 0,
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "default": true,
+          "deprecated": false,
+          "description": "By default this process throws an `ArrayElementNotAvailable` exception if the index or label is invalid. If you want to return `null` instead, set this flag to `true`.",
+          "experimental": false,
+          "name": "return_nodata",
+          "optional": true,
+          "schema": {
+            "minItems": 0,
+            "type": "boolean"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The value of the requested element.",
+        "schema": {
+          "description": "Any data type is allowed.",
+          "minItems": 0
+        }
+      },
+      "summary": "Get an element from an array"
+    },
+    {
+      "categories": [
+        "math"
+      ],
+      "deprecated": false,
+      "description": "Divides argument `x` by the argument `y` (*x / y*) and returns the computed result.\n\nNo-data values are taken into account so that `null` is returned if any element is such a value.\n\nThe computations follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/8766229) whenever the processing environment supports it. Therefore, a division by zero results in ±infinity if the processing environment supports it. Otherwise a `DivisionByZero` error must the thrown.",
+      "examples": [
+        {
+          "arguments": {
+            "x": 5,
+            "y": 2.5
+          },
+          "returns": 2
+        },
+        {
+          "arguments": {
+            "x": -2,
+            "y": 4
+          },
+          "returns": -0.5
+        },
+        {
+          "arguments": {
+            "x": 1,
+            "y": null
+          },
+          "returns": null
+        }
+      ],
+      "exceptions": {
+        "DivisionByZero": {
+          "http": 400,
+          "message": "Division by zero is not supported."
+        }
+      },
+      "experimental": false,
+      "id": "divide",
+      "links": [
+        {
+          "href": "http://mathworld.wolfram.com/Division.html",
+          "rel": "about",
+          "title": "Division explained by Wolfram MathWorld"
+        },
+        {
+          "href": "https://ieeexplore.ieee.org/document/8766229",
+          "rel": "about",
+          "title": "IEEE Standard 754-2019 for Floating-Point Arithmetic"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "The dividend.",
+          "experimental": false,
+          "name": "x",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The divisor.",
+          "experimental": false,
+          "name": "y",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The computed result.",
+        "schema": {
+          "minItems": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "summary": "Division of two numbers"
+    },
+    {
+      "categories": [
+        "cubes",
+        "filter"
+      ],
+      "deprecated": false,
+      "description": "Filters the bands in the data cube so that bands that don't match any of the criteria are dropped from the data cube. The data cube is expected to have only one dimension of type `bands`. Fails with a `DimensionMissing` error if no such dimension exists.\n\nThe following criteria can be used to select bands:\n\n* `bands`: band name or common band name (e.g. `B01`, `B8A`, `red` or `nir`)\n* `wavelengths`: ranges of wavelengths in micrometres (μm) (e.g. 0.5 - 0.6)\n\nAll these information are exposed in the band metadata of the collection. To keep algorithms interoperable it is recommended to prefer the common bands names or the wavelengths over collection and/or back-end specific band names.\n\nIf multiple criteria are specified, any of them must match and not all of them, i.e. they are combined with an OR-operation. If no criteria is specified, the `BandFilterParameterMissing` exception must be thrown.\n\n**Important:** The order of the specified array defines the order of the bands in the data cube, which can be important for subsequent processes. If multiple bands are matched by a single criterion (e.g. a range of wavelengths), they stay in the original order.",
+      "exceptions": {
+        "BandFilterParameterMissing": {
+          "http": 400,
+          "message": "The process 'filter_bands' requires any of the parameters 'bands', 'common_names' or 'wavelengths' to be set."
+        },
+        "DimensionMissing": {
+          "http": 400,
+          "message": "A band dimension is missing."
+        }
+      },
+      "experimental": false,
+      "id": "filter_bands",
+      "links": [
+        {
+          "href": "https://github.com/radiantearth/stac-spec/tree/master/extensions/eo#common-band-names",
+          "rel": "about",
+          "title": "List of common band names as specified by the STAC specification"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "A data cube with bands.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "raster-cube",
+            "type": "object"
+          }
+        },
+        {
+          "default": "[]",
+          "deprecated": false,
+          "description": "A list of band names. Either the unique band name (metadata field `name` in bands) or one of the common band names (metadata field `common_name` in bands). If unique band name and common name conflict, the unique band name has higher priority.\n\nThe order of the specified array defines the order of the bands in the data cube. If multiple bands match a common name, all matched bands are included in the original order.",
+          "experimental": false,
+          "name": "bands",
+          "optional": true,
+          "schema": {
+            "items": {
+              "subtype": "band-name",
+              "type": "string"
+            },
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        {
+          "default": "[]",
+          "deprecated": false,
+          "description": "A list of sub-lists with each sub-list consisting of two elements. The first element is the minimum wavelength and the second element is the maximum wavelength. Wavelengths are specified in micrometres (μm).\n\nThe order of the specified array defines the order of the bands in the data cube. If multiple bands match the wavelengths, all matched bands are included in the original order.",
+          "experimental": false,
+          "name": "wavelengths",
+          "optional": true,
+          "schema": {
+            "items": {
+              "examples": [
+                [
+                  [
+                    0.45,
+                    0.5
+                  ],
+                  [
+                    0.6,
+                    0.7
+                  ]
+                ]
+              ],
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            "minItems": 0,
+            "type": "array"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "A data cube limited to a subset of its original bands. The dimensions and dimension properties (name, type, labels, reference system and resolution) remain unchanged, except that the dimension of type `bands` has less (or the same) dimension labels.",
+        "schema": {
+          "minItems": 0,
+          "subtype": "raster-cube",
+          "type": "object"
+        }
+      },
+      "summary": "Filter the bands by name"
+    },
+    {
+      "categories": [
+        "math",
+        "reducer"
+      ],
+      "deprecated": false,
+      "description": "The arithmetic mean of an array of numbers is the quantity commonly called the average. It is defined as the sum of all elements divided by the number of elements.\n\nAn array without non-`null` elements resolves always with `null`.",
+      "examples": [
+        {
+          "arguments": {
+            "data": [
+              1,
+              0,
+              3,
+              2
+            ]
+          },
+          "returns": 1.5
+        },
+        {
+          "arguments": {
+            "data": [
+              9,
+              2.5,
+              null,
+              -2.5
+            ]
+          },
+          "returns": 3
+        },
+        {
+          "arguments": {
+            "data": [
+              1,
+              null
+            ],
+            "ignore_nodata": false
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "data": []
+          },
+          "description": "The input array is empty: return `null`.",
+          "returns": null
+        },
+        {
+          "arguments": {
+            "data": [
+              null,
+              null
+            ]
+          },
+          "description": "The input array has only `null` elements: return `null`.",
+          "returns": null
+        }
+      ],
+      "exceptions": {},
+      "experimental": false,
+      "id": "mean",
+      "links": [
+        {
+          "href": "http://mathworld.wolfram.com/ArithmeticMean.html",
+          "rel": "about",
+          "title": "Arithmetic mean explained by Wolfram MathWorld"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "An array of numbers.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "items": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        {
+          "default": true,
+          "deprecated": false,
+          "description": "Indicates whether no-data values are ignored or not. Ignores them by default. Setting this flag to `false` considers no-data values so that `null` is returned if any value is such a value.",
+          "experimental": false,
+          "name": "ignore_nodata",
+          "optional": true,
+          "schema": {
+            "minItems": 0,
+            "type": "boolean"
+          }
+        }
+      ],
+      "process_graph": {
+        "count": {
+          "arguments": {
+            "condition": {
+              "from_node": "count_condition"
+            },
+            "data": {
+              "from_parameter": "data"
+            }
+          },
+          "process_id": "count"
+        },
+        "count_condition": {
+          "arguments": {
+            "accept": null,
+            "reject": true,
+            "value": {
+              "from_parameter": "ignore_nodata"
+            }
+          },
+          "process_id": "if"
+        },
+        "divide": {
+          "arguments": {
+            "x": {
+              "from_node": "sum"
+            },
+            "y": {
+              "from_node": "count"
+            }
+          },
+          "process_id": "divide"
+        },
+        "if": {
+          "arguments": {
+            "accept": {
+              "from_node": "divide"
+            },
+            "value": {
+              "from_node": "neq"
+            }
+          },
+          "process_id": "if",
+          "result": true
+        },
+        "neq": {
+          "arguments": {
+            "x": {
+              "from_node": "count"
+            },
+            "y": 0
+          },
+          "process_id": "neq"
+        },
+        "sum": {
+          "arguments": {
+            "data": {
+              "from_parameter": "data"
+            },
+            "ignore_nodata": {
+              "from_parameter": "ignore_nodata"
+            }
+          },
+          "process_id": "sum"
+        }
+      },
+      "returns": {
+        "description": "The computed arithmetic mean.",
+        "schema": {
+          "minItems": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "summary": "Arithmetic mean (average)"
+    },
+    {
+      "categories": [
+        "cubes"
+      ],
+      "deprecated": false,
+      "description": "The data cubes have to be compatible. A merge operation without overlap should be reversible with (a set of) filter operations for each of the two cubes. The process performs the join on overlapping dimensions, with the same name and type.\n\nAn overlapping dimension has the same name, type, reference system and resolution in both dimensions, but can have different labels. One of the dimensions can have different labels, for all other dimensions the labels must be equal. If data overlaps, the parameter `overlap_resolver` must be specified to resolve the overlap.\n\n**Examples for merging two data cubes:**\n\n1. Data cubes with the dimensions `x`, `y`, `t` and `bands` have the same dimension labels in `x`,`y` and `t`, but the labels for the dimension `bands` are `B1` and `B2` for the first cube and `B3` and `B4`. An overlap resolver is *not needed*. The merged data cube has the dimensions `x`, `y`, `t` and `bands` and the dimension `bands` has four dimension labels: `B1`, `B2`, `B3`, `B4`.\n2. Data cubes with the dimensions `x`, `y`, `t` and `bands` have the same dimension labels in `x`,`y` and `t`, but the labels for the dimension `bands` are `B1` and `B2` for the first data cube and `B2` and `B3` for the second. An overlap resolver is *required* to resolve overlap in band `B2`. The merged data cube has the dimensions `x`, `y`, `t` and `bands` and the dimension `bands` has three dimension labels: `B1`, `B2`, `B3`.\n3. Data cubes with the dimensions `x`, `y` and `t` have the same dimension labels in `x`,`y` and `t`. There are two options:\n   1. Keep the overlapping values separately in the merged data cube: An overlap resolver is *not needed*, but for each data cube you need to add a new dimension using ``add_dimension()``. The new dimensions must be equal, except that the labels for the new dimensions must differ by name. The merged data cube has the same dimensions and labels as the original data cubes, plus the dimension added with ``add_dimension()``, which has the two dimension labels after the merge.\n   2. Combine the overlapping values into a single value: An overlap resolver is *required* to resolve the overlap for all pixels. The merged data cube has the same dimensions and labels as the original data cubes, but all pixel values have been processed by the overlap resolver.\n4. Merging a data cube with dimensions `x`, `y`, `t` with another cube with dimensions `x`, `y` will join on the `x`, `y` dimension, so the lower dimension cube is merged with each time step in the higher dimensional cube. This can for instance be used to apply a digital elevation model to a spatiotemporal data cube.",
+      "exceptions": {
+        "OverlapResolverMissing": {
+          "http": 400,
+          "message": "Overlapping data cubes, but no overlap resolver has been specified."
+        }
+      },
+      "experimental": false,
+      "id": "merge_cubes",
+      "links": [
+        {
+          "href": "https://en.wikipedia.org/wiki/Reduction_Operator",
+          "rel": "about",
+          "title": "Background information on reduction operators (binary reducers) by Wikipedia"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "The first data cube.",
+          "experimental": false,
+          "name": "cube1",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "raster-cube",
+            "type": "object"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The second data cube.",
+          "experimental": false,
+          "name": "cube2",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "raster-cube",
+            "type": "object"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "A reduction operator that resolves the conflict if the data overlaps. The reducer must return a value of the same data type as the input values are. The reduction operator may be a single process such as ``multiply()`` or consist of multiple sub-processes. `null` (the default) can be specified if no overlap resolver is required.",
+          "experimental": false,
+          "name": "overlap_resolver",
+          "optional": true,
+          "schema": {
+            "minItems": 0,
+            "parameters": [
+              {
+                "deprecated": false,
+                "description": "The first value.",
+                "experimental": false,
+                "name": "x",
+                "optional": false,
+                "schema": {
+                  "description": "Any data type.",
+                  "minItems": 0
+                }
+              },
+              {
+                "deprecated": false,
+                "description": "The second value.",
+                "experimental": false,
+                "name": "y",
+                "optional": false,
+                "schema": {
+                  "description": "Any data type.",
+                  "minItems": 0
+                }
+              },
+              {
+                "deprecated": false,
+                "description": "Additional data passed by the user.",
+                "experimental": false,
+                "name": "context",
+                "optional": true,
+                "schema": {
+                  "description": "Any data type.",
+                  "minItems": 0
+                }
+              }
+            ],
+            "subtype": "process-graph",
+            "type": "object"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "Additional data to be passed to the overlap resolver.",
+          "experimental": false,
+          "name": "context",
+          "optional": true,
+          "schema": {
+            "description": "Any data type.",
+            "minItems": 0
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The merged data cube. See the process description for details regarding the dimensions and dimension properties (name, type, labels, reference system and resolution).",
+        "schema": {
+          "minItems": 0,
+          "subtype": "raster-cube",
+          "type": "object"
+        }
+      },
+      "summary": "Merging two data cubes"
+    },
+    {
+      "categories": [
+        "math",
+        "reducer"
+      ],
+      "deprecated": false,
+      "description": "Multiplies all elements in a sequential array of numbers and returns the computed product.\n\nBy default no-data values are ignored. Setting `ignore_nodata` to `false` considers no-data values so that `null` is returned if any element is such a value.\n\nThe computations follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/8766229) whenever the processing environment supports it.",
+      "examples": [
+        {
+          "arguments": {
+            "data": [
+              5,
+              0
+            ]
+          },
+          "returns": 0
+        },
+        {
+          "arguments": {
+            "data": [
+              -2,
+              4,
+              2.5
+            ]
+          },
+          "returns": -20
+        },
+        {
+          "arguments": {
+            "data": [
+              1,
+              null
+            ],
+            "ignore_nodata": false
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "data": [
+              -1
+            ]
+          },
+          "returns": -1
+        },
+        {
+          "arguments": {
+            "data": [
+              null
+            ],
+            "ignore_nodata": false
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "data": []
+          },
+          "returns": null
+        }
+      ],
+      "exceptions": {},
+      "experimental": false,
+      "id": "product",
+      "links": [
+        {
+          "href": "http://mathworld.wolfram.com/Product.html",
+          "rel": "about",
+          "title": "Product explained by Wolfram MathWorld"
+        },
+        {
+          "href": "https://ieeexplore.ieee.org/document/8766229",
+          "rel": "about",
+          "title": "IEEE Standard 754-2019 for Floating-Point Arithmetic"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "An array of numbers.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "items": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        {
+          "default": true,
+          "deprecated": false,
+          "description": "Indicates whether no-data values are ignored or not. Ignores them by default. Setting this flag to `false` considers no-data values so that `null` is returned if any value is such a value.",
+          "experimental": false,
+          "name": "ignore_nodata",
+          "optional": true,
+          "schema": {
+            "minItems": 0,
+            "type": "boolean"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The computed product of the sequence of numbers.",
+        "schema": {
+          "minItems": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "summary": "Compute the product by multiplying numbers"
+    },
+    {
+      "categories": [
+        "math"
+      ],
+      "deprecated": false,
+      "description": "Multiplies the two numbers `x` and `y` (*x * y*) and returns the computed product.\n\nNo-data values are taken into account so that `null` is returned if any element is such a value.\n\nThe computations follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/8766229) whenever the processing environment supports it.",
+      "examples": [
+        {
+          "arguments": {
+            "x": 5,
+            "y": 2.5
+          },
+          "returns": 12.5
+        },
+        {
+          "arguments": {
+            "x": -2,
+            "y": -4
+          },
+          "returns": 8
+        },
+        {
+          "arguments": {
+            "x": 1,
+            "y": null
+          },
+          "returns": null
+        }
+      ],
+      "exceptions": {
+        "MultiplicandMissing": {
+          "http": 400,
+          "message": "Multiplication requires at least two numbers."
+        }
+      },
+      "experimental": false,
+      "id": "multiply",
+      "links": [
+        {
+          "href": "http://mathworld.wolfram.com/Product.html",
+          "rel": "about",
+          "title": "Product explained by Wolfram MathWorld"
+        },
+        {
+          "href": "https://ieeexplore.ieee.org/document/8766229",
+          "rel": "about",
+          "title": "IEEE Standard 754-2019 for Floating-Point Arithmetic"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "The multiplier.",
+          "experimental": false,
+          "name": "x",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The multiplicand.",
+          "experimental": false,
+          "name": "y",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      ],
+      "process_graph": {
+        "product": {
+          "arguments": {
+            "data": [
+              {
+                "from_parameter": "x"
+              },
+              {
+                "from_parameter": "y"
+              }
+            ],
+            "ignore_nodata": false
+          },
+          "process_id": "product",
+          "result": true
+        }
+      },
+      "returns": {
+        "description": "The computed product of the two numbers.",
+        "schema": {
+          "minItems": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "summary": "Multiplication of two numbers"
+    },
+    {
+      "categories": [
+        "math",
+        "reducer"
+      ],
+      "deprecated": false,
+      "description": "Computes the smallest value of an array of numbers, which is is equal to the last element of a sorted (i.e., ordered) version the array.\n\nAn array without non-`null` elements resolves always with `null`.",
+      "examples": [
+        {
+          "arguments": {
+            "data": [
+              1,
+              0,
+              3,
+              2
+            ]
+          },
+          "returns": 0
+        },
+        {
+          "arguments": {
+            "data": [
+              5,
+              2.5,
+              null,
+              -0.7
+            ]
+          },
+          "returns": -0.7
+        },
+        {
+          "arguments": {
+            "data": [
+              1,
+              0,
+              3,
+              null,
+              2
+            ],
+            "ignore_nodata": false
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "data": []
+          },
+          "returns": null
+        }
+      ],
+      "exceptions": {},
+      "experimental": false,
+      "id": "min",
+      "links": [
+        {
+          "href": "http://mathworld.wolfram.com/Minimum.html",
+          "rel": "about",
+          "title": "Minimum explained by Wolfram MathWorld"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "An array of numbers.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "items": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        {
+          "default": true,
+          "deprecated": false,
+          "description": "Indicates whether no-data values are ignored or not. Ignores them by default. Setting this flag to `false` considers no-data values so that `null` is returned if any value is such a value.",
+          "experimental": false,
+          "name": "ignore_nodata",
+          "optional": true,
+          "schema": {
+            "minItems": 0,
+            "type": "boolean"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The minimum value.",
+        "schema": {
+          "minItems": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "summary": "Minimum value"
+    },
+    {
+      "categories": [
+        "cubes",
+        "reducer"
+      ],
+      "deprecated": false,
+      "description": "Applies a unary reducer to a data cube dimension by collapsing all the pixel values along the specified dimension into an output value computed by the reducer. This process passes a list of values to the reducer. In contrast, ``reduce_dimension_binary()`` passes two values, which may be better suited especially for UDFs in case the number of values gets too large to be processed at once.\n\nThe dimension is dropped. To avoid this, use ``apply_dimension()`` instead.",
+      "exceptions": {
+        "DimensionNotAvailable": {
+          "http": 400,
+          "message": "A dimension with the specified name does not exist."
+        }
+      },
+      "experimental": false,
+      "id": "reduce_dimension",
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "A data cube.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "raster-cube",
+            "type": "object"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "A reducer to apply on the specified dimension. A reducer is a single process such as ``mean()`` or a set of processes, which computes a single value for a list of values, see the category 'reducer' for such processes.",
+          "experimental": false,
+          "name": "reducer",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "parameters": [
+              {
+                "deprecated": false,
+                "description": "A labeled array with elements of any type.",
+                "experimental": false,
+                "name": "data",
+                "optional": false,
+                "schema": {
+                  "items": {
+                    "description": "Any data type."
+                  },
+                  "minItems": 0,
+                  "subtype": "labeled-array",
+                  "type": "array"
+                }
+              },
+              {
+                "deprecated": false,
+                "description": "Additional data passed by the user.",
+                "experimental": false,
+                "name": "context",
+                "optional": true,
+                "schema": {
+                  "description": "Any data type.",
+                  "minItems": 0
+                }
+              }
+            ],
+            "subtype": "process-graph",
+            "type": "object"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The name of the dimension over which to reduce. Fails with a `DimensionNotAvailable` error if the specified dimension does not exist.",
+          "experimental": false,
+          "name": "dimension",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": "string"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "Additional data to be passed to the reducer.",
+          "experimental": false,
+          "name": "context",
+          "optional": true,
+          "schema": {
+            "description": "Any data type.",
+            "minItems": 0
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "A data cube with the newly computed values. It is missing the given dimension, the number of dimensions decreases by one. The dimension properties (name, type, labels, reference system and resolution) for all other dimensions remain unchanged.",
+        "schema": {
+          "minItems": 0,
+          "subtype": "raster-cube",
+          "type": "object"
+        }
+      },
+      "summary": "Reduce dimensions"
+    },
+    {
+      "categories": [
+        "cubes"
+      ],
+      "deprecated": false,
+      "description": "Renames the labels of the specified dimension in the data cube from `source` to `target`.\n\nIf the array for the source labels is empty (the default), the dimension labels are expected to be enumerated with zero-based numbering (0,1,2,3,...) so that the dimension labels directly map to the indices of the array specified for the parameter `target`. If the dimension labels are not enumerated and the `target` parameter is not specified, a `LabelsNotEnumerated` is thrown. The number of source and target labels must be equal, otherwise the error `LabelMismatch` is thrown.\n\nThis process doesn't change the order of the labels and their corresponding data.",
+      "examples": [
+        {
+          "arguments": {
+            "data": {
+              "from_parameter": "data"
+            },
+            "dimension": "bands",
+            "source": [
+              "B1",
+              "B2",
+              "B3"
+            ],
+            "target": [
+              "red",
+              "green",
+              "blue"
+            ]
+          },
+          "description": "Renaming the bands from `B1` to `red`, from `B2` to `green` and from `B3` to `blue`.",
+          "returns": null,
+          "title": "Rename named labels"
+        }
+      ],
+      "exceptions": {
+        "LabelExists": {
+          "http": 400,
+          "message": "A label with the specified name exists."
+        },
+        "LabelMismatch": {
+          "http": 400,
+          "message": "The number of labels in the parameters `source` and `target` don't match."
+        },
+        "LabelNotAvailable": {
+          "http": 400,
+          "message": "A label with the specified name does not exist."
+        },
+        "LabelsNotEnumerated": {
+          "http": 400,
+          "message": "The dimension labels are not enumerated."
+        }
+      },
+      "experimental": false,
+      "id": "rename_labels",
+      "links": [
+        {
+          "href": "https://processes.openeo.org/1.0.0/examples/rename-enumerated-labels.json",
+          "rel": "example",
+          "title": "Rename enumerated labels",
+          "type": "application/json"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "The data cube.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "raster-cube",
+            "type": "object"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The name of the dimension to rename the labels for.",
+          "experimental": false,
+          "name": "dimension",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": "string"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The new names for the labels. The dimension labels in the data cube are expected to be enumerated, if the parameter `target` is not specified. If a target dimension label already exists in the data cube, a `LabelExists` error is thrown.",
+          "experimental": false,
+          "name": "target",
+          "optional": false,
+          "schema": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        {
+          "default": "[]",
+          "deprecated": false,
+          "description": "The names of the labels as they are currently in the data cube. The array defines an unsorted and potentially incomplete list of labels that should be renamed to the names available in the corresponding array elements in the parameter `target`. If one of the source dimension labels doesn't exist, a `LabelNotAvailable` error is thrown. By default, the array is empty so that the dimension labels in the data cube are expected to be enumerated.",
+          "experimental": false,
+          "name": "source",
+          "optional": true,
+          "schema": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "minItems": 0,
+            "type": "array"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The data cube with the same dimensions. The dimension properties (name, type, labels, reference system and resolution) remain unchanged, except that for the given dimension the labels change. The old labels can not be referred to any longer. The number of labels remains the same.",
+        "schema": {
+          "minItems": 0,
+          "subtype": "raster-cube",
+          "type": "object"
+        }
+      },
+      "summary": "Rename dimension labels"
+    },
+    {
+      "categories": [
+        "cubes",
+        "import",
+        "udf"
+      ],
+      "deprecated": false,
+      "description": "Runs an UDF in one of the supported runtime environments.\n\nThe process can either:\n\n1. load and run a locally stored UDF from a file in the workspace of the authenticated user. The path to the UDF file must be relative to the root directory of the user's workspace.\n2. fetch and run a remotely stored and published UDF by absolute URI, for example from [openEO Hub](https://hub.openeo.org)).\n3. run the source code specified inline as string.\n\nThe loaded UDF can be executed in several processes such as ``aggregate_spatial()``, ``apply()``, ``apply_dimension()`` and ``reduce_dimension()``. In this case an array is passed instead of a raster data cube. The user must ensure that the data is properly passed as an array so that the UDF can make sense of it.",
+      "exceptions": {
+        "InvalidVersion": {
+          "http": 400,
+          "message": "The specified UDF runtime version is not supported."
+        }
+      },
+      "experimental": false,
+      "id": "run_udf",
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "The data to be passed to the UDF as array or raster data cube.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": [
+            {
+              "minItems": 0,
+              "subtype": "raster-cube",
+              "title": "Raster data cube",
+              "type": "object"
+            },
+            {
+              "items": {
+                "description": "Any data type."
+              },
+              "minItems": 1,
+              "title": "Array",
+              "type": "array"
+            },
+            {
+              "description": "A single value of any data type.",
+              "minItems": 0,
+              "title": "Single Value"
+            }
+          ]
+        },
+        {
+          "deprecated": false,
+          "description": "Either source code, an absolute URL or a path to an UDF script.",
+          "experimental": false,
+          "name": "udf",
+          "optional": false,
+          "schema": [
+            {
+              "description": "URI to an UDF",
+              "format": "uri",
+              "minItems": 0,
+              "subtype": "uri",
+              "type": "string"
+            },
+            {
+              "description": "Path to an UDF uploaded to the server.",
+              "minItems": 0,
+              "subtype": "file-path",
+              "type": "string"
+            },
+            {
+              "description": "Source code as string",
+              "minItems": 0,
+              "subtype": "udf-code",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "deprecated": false,
+          "description": "An UDF runtime identifier available at the back-end.",
+          "experimental": false,
+          "name": "runtime",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "udf-runtime",
+            "type": "string"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "An UDF runtime version. If set to `null`, the default runtime version specified for each runtime is used.",
+          "experimental": false,
+          "name": "version",
+          "optional": true,
+          "schema": [
+            {
+              "minItems": 0,
+              "subtype": "udf-runtime-version",
+              "type": "string"
+            },
+            {
+              "minItems": 0,
+              "title": "Default runtime version",
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "default": "{}",
+          "deprecated": false,
+          "description": "Additional data such as configuration options that should be passed to the UDF.",
+          "experimental": false,
+          "name": "context",
+          "optional": true,
+          "schema": {
+            "minItems": 0,
+            "type": "object"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The data processed by the UDF.\n\n* Returns a raster data cube, if a raster data cube is passed for `data`. Details on the dimensions and dimension properties (name, type, labels, reference system and resolution) depend on the UDF.\n* If an array is passed for `data`, the returned value can be of any data type, but is exactly what the UDF returns.",
+        "schema": [
+          {
+            "minItems": 0,
+            "subtype": "raster-cube",
+            "title": "Raster data cube",
+            "type": "object"
+          },
+          {
+            "description": "Any data type.",
+            "minItems": 0,
+            "title": "Any"
+          }
+        ]
+      },
+      "summary": "Run an UDF"
+    },
+    {
+      "categories": [
+        "cubes",
+        "export"
+      ],
+      "deprecated": false,
+      "description": "Saves processed data to the local user workspace / data store of the authenticated user. This process aims to be compatible to GDAL/OGR formats and options. STAC-compatible metadata should be stored with the processed data.\n\nCalling this process may be rejected by back-ends in the context of secondary web services.",
+      "exceptions": {
+        "FormatUnsuitable": {
+          "http": 400,
+          "message": "Data can't be transformed into the requested output format."
+        }
+      },
+      "experimental": false,
+      "id": "save_result",
+      "links": [
+        {
+          "href": "https://www.gdal.org/formats_list.html",
+          "rel": "about",
+          "title": "GDAL Raster Formats"
+        },
+        {
+          "href": "https://www.gdal.org/ogr_formats.html",
+          "rel": "about",
+          "title": "OGR Vector Formats"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "The data to save.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": [
+            {
+              "minItems": 0,
+              "subtype": "raster-cube",
+              "type": "object"
+            },
+            {
+              "minItems": 0,
+              "subtype": "vector-cube",
+              "type": "object"
+            }
+          ]
+        },
+        {
+          "deprecated": false,
+          "description": "The file format to save to. It must be one of the values that the server reports as supported output file formats, which usually correspond to the short GDAL/OGR codes. If the format is not suitable for storing the underlying data structure, a `FormatUnsuitable` exception will be thrown. This parameter is *case insensitive*.",
+          "experimental": false,
+          "name": "format",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "output-format",
+            "type": "string"
+          }
+        },
+        {
+          "default": "{}",
+          "deprecated": false,
+          "description": "The file format parameters to be used to create the file(s). Must correspond to the parameters that the server reports as supported parameters for the chosen `format`. The parameter names and valid values usually correspond to the GDAL/OGR format options.",
+          "experimental": false,
+          "name": "options",
+          "optional": true,
+          "schema": {
+            "minItems": 0,
+            "subtype": "output-format-options",
+            "type": "object"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "`false` if saving failed, `true` otherwise.",
+        "schema": {
+          "minItems": 0,
+          "type": "boolean"
+        }
+      },
+      "summary": "Save processed data to storage"
+    },
+    {
+      "categories": [
+        "math"
+      ],
+      "deprecated": false,
+      "description": "Subtracts argument `y` from the argument `x` (*x - y*) and returns the computed result.\n\nNo-data values are taken into account so that `null` is returned if any element is such a value.\n\nThe computations follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/8766229) whenever the processing environment supports it.",
+      "examples": [
+        {
+          "arguments": {
+            "x": 5,
+            "y": 2.5
+          },
+          "returns": 2.5
+        },
+        {
+          "arguments": {
+            "x": -2,
+            "y": 4
+          },
+          "returns": -6
+        },
+        {
+          "arguments": {
+            "x": 1,
+            "y": null
+          },
+          "returns": null
+        }
+      ],
+      "exceptions": {},
+      "experimental": false,
+      "id": "subtract",
+      "links": [
+        {
+          "href": "http://mathworld.wolfram.com/Subtraction.html",
+          "rel": "about",
+          "title": "Subtraction explained by Wolfram MathWorld"
+        },
+        {
+          "href": "https://ieeexplore.ieee.org/document/8766229",
+          "rel": "about",
+          "title": "IEEE Standard 754-2019 for Floating-Point Arithmetic"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "The minuend.",
+          "experimental": false,
+          "name": "x",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The subtrahend.",
+          "experimental": false,
+          "name": "y",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The computed result.",
+        "schema": {
+          "minItems": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "summary": "Subtraction of two numbers"
+    },
+    {
+      "categories": [
+        "math",
+        "reducer"
+      ],
+      "deprecated": false,
+      "description": "Sums up all elements in a sequential array of numbers and returns the computed sum.\n\nBy default no-data values are ignored. Setting `ignore_nodata` to `false` considers no-data values so that `null` is returned if any element is such a value.\n\nThe computations follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/8766229) whenever the processing environment supports it.",
+      "examples": [
+        {
+          "arguments": {
+            "data": [
+              5,
+              1
+            ]
+          },
+          "returns": 6
+        },
+        {
+          "arguments": {
+            "data": [
+              -2,
+              4,
+              2.5
+            ]
+          },
+          "returns": 4.5
+        },
+        {
+          "arguments": {
+            "data": [
+              1,
+              null
+            ],
+            "ignore_nodata": false
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "data": [
+              100
+            ]
+          },
+          "returns": 100
+        },
+        {
+          "arguments": {
+            "data": [
+              null
+            ],
+            "ignore_nodata": false
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "data": []
+          },
+          "returns": null
+        }
+      ],
+      "exceptions": {},
+      "experimental": false,
+      "id": "sum",
+      "links": [
+        {
+          "href": "http://mathworld.wolfram.com/Sum.html",
+          "rel": "about",
+          "title": "Sum explained by Wolfram MathWorld"
+        },
+        {
+          "href": "https://ieeexplore.ieee.org/document/8766229",
+          "rel": "about",
+          "title": "IEEE Standard 754-2019 for Floating-Point Arithmetic"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "An array of numbers.",
+          "experimental": false,
+          "name": "data",
+          "optional": false,
+          "schema": {
+            "items": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        {
+          "default": true,
+          "deprecated": false,
+          "description": "Indicates whether no-data values are ignored or not. Ignores them by default. Setting this flag to `false` considers no-data values so that `null` is returned if any value is such a value.",
+          "experimental": false,
+          "name": "ignore_nodata",
+          "optional": true,
+          "schema": {
+            "minItems": 0,
+            "type": "boolean"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The computed sum of the sequence of numbers.",
+        "schema": {
+          "minItems": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "summary": "Compute the sum by adding up numbers"
+    }
+  ]
+}
