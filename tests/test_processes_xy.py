@@ -4,13 +4,7 @@
 from openeo_odc.map_processes_odc import map_xy
 
 
-def test_processes_xy():
-    """Map processes with input type f(x, y)."""
-
-    multiply()
-
-
-def multiply():
+def test_multiply():
     """Test all multiply conversions."""
 
     process_defs = [

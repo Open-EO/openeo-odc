@@ -4,13 +4,7 @@
 from openeo_odc.map_processes_odc import map_data
 
 
-def test_processes_data():
-    """Map processes with input type f(data, **kwargs)."""
-
-    array_element()
-
-
-def array_element():
+def test_array_element():
     """Test all array_element conversions."""
 
     process_defs = [
