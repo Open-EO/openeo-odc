@@ -5,7 +5,7 @@ from openeo_odc.map_processes_odc import map_xy
 
 
 def test_processes_xy():
-    """Create a ODC/xarray job based on an openEO process graph."""
+    """Map processes with input type f(x, y)."""
 
     multiply()
 
