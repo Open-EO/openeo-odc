@@ -149,9 +149,9 @@ def create_string(dict_input):
                 val_str = "["
                 for val in value:
                     val_str += str(val) + ', '
-                inputs.append(f"'{key}':{val_str[:-2]}]")
+                inputs.append(f"'{key}': {val_str[:-2]}]")
             else:
-                inputs.append(f"'{key}':{value}")
+                inputs.append(f"'{key}': {value}")
         else:
             continue
 
