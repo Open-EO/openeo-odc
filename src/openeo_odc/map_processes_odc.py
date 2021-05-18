@@ -40,7 +40,7 @@ def map_load_collection(id, process):
 """
 
 
-def map_xy(id, process, kwargs):
+def map_xy(id, process):
     """Map to xarray version of processes with input (x, y).
 
     Creates a string like the following:
@@ -59,7 +59,7 @@ def map_xy(id, process, kwargs):
         params['x'] = params['x']['from_node']
     if isinstance(params['y'], dict) and 'from_node' in params['y']:
         params['y'] = params['y']['from_node']
-    params = convert_from_node_parameter(params, kwargs['from_parameter'])
+    params = convert_from_node_parameter(params)
     params_str = create_string(params)
 
     return f"""{id} = oeop.{process_name}({params_str})
