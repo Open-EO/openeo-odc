@@ -29,7 +29,7 @@ from openeo_odc.map_processes_odc import map_data
     ]
 )
 def test_array_element(node_id, process_def, kwargs, process_ref):
-    """Test all array_element conversions."""
+    """Test all `array_element` conversions."""
 
     out = map_data(node_id, process_def, kwargs)
     assert out == process_ref

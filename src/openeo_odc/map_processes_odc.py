@@ -118,7 +118,7 @@ def convert_from_node_parameter(args_in, from_par=None):
 
 
 def check_dimension(in_value):
-    """ """
+    """ Convert common dimension names to a preset value."""
 
     if in_value in ('t', 'time', 'temporal'):
         out_value = 'time'

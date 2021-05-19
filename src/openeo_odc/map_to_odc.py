@@ -6,9 +6,7 @@ from openeo_odc.map_processes_odc import map_xy, map_data, map_load_collection
 
 
 def map_to_odc(graph, odc_env, odc_url):
-    """
-
-    """
+    """Map openEO process graph to xarray/opendatacube functions."""
 
     nodes = {
         'header': create_job_header(odc_env, odc_url)

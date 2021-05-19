@@ -26,7 +26,7 @@ from openeo_odc.map_processes_odc import map_xy
     ]
 )
 def test_multiply(node_id, process_def, process_ref):
-    """Test all multiply conversions."""
+    """Test all `multiply` conversions."""
 
     out = map_xy(node_id, process_def)
     assert out == process_ref
