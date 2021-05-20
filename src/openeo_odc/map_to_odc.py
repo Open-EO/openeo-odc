@@ -6,9 +6,7 @@ from openeo_odc.map_processes_odc import map_xy, map_data, map_load_collection
 
 
 def map_to_odc(graph, odc_env, odc_url):
-    """
-
-    """
+    """Map openEO process graph to xarray/opendatacube functions."""
 
     nodes = {
         'header': create_job_header(odc_env, odc_url)
@@ -23,7 +21,7 @@ def map_to_odc(graph, odc_env, odc_url):
         if cur_node.parent_process:
             kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
         if tuple(cur_node.arguments.keys()) == ('x', 'y'):
-            nodes[cur_node.id] = map_xy(cur_node.id, cur_node.content, kwargs)
+            nodes[cur_node.id] = map_xy(cur_node.id, cur_node.content)
         elif 'data' in tuple(cur_node.arguments.keys()):
             nodes[cur_node.id] = map_data(cur_node.id, cur_node.content, kwargs)
         elif 'id' in tuple(cur_node.arguments.keys()):

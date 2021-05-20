@@ -40,7 +40,7 @@ def map_load_collection(id, process):
 """
 
 
-def map_xy(id, process, kwargs):
+def map_xy(id, process):
     """Map to xarray version of processes with input (x, y).
 
     Creates a string like the following:
@@ -59,7 +59,7 @@ def map_xy(id, process, kwargs):
         params['x'] = params['x']['from_node']
     if isinstance(params['y'], dict) and 'from_node' in params['y']:
         params['y'] = params['y']['from_node']
-    params = convert_from_node_parameter(params, kwargs['from_parameter'])
+    params = convert_from_node_parameter(params)
     params_str = create_string(params)
 
     return f"""{id} = oeop.{process_name}({params_str})
@@ -118,7 +118,7 @@ def convert_from_node_parameter(args_in, from_par=None):
 
 
 def check_dimension(in_value):
-    """ """
+    """ Convert common dimension names to a preset value."""
 
     if in_value in ('t', 'time', 'temporal'):
         out_value = 'time'
@@ -149,9 +149,9 @@ def create_string(dict_input):
                 val_str = "["
                 for val in value:
                     val_str += str(val) + ', '
-                inputs.append(f"'{key}':{val_str[:-2]}]")
+                inputs.append(f"'{key}': {val_str[:-2]}]")
             else:
-                inputs.append(f"'{key}':{value}")
+                inputs.append(f"'{key}': {value}")
         else:
             continue
 

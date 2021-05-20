@@ -9,7 +9,7 @@ from openeo_pg_parser.validate import validate_processes
 
 
 def test_job():
-    """Create a ODC/xarray job based on an openEO process graph."""
+    """Create a xarray/opendatacube job based on an openEO process graph."""
 
     # Set input parameters
     tests_folder = os.path.dirname(os.path.abspath(__file__))
