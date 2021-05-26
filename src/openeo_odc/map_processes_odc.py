@@ -23,13 +23,13 @@ def map_load_collection(id, process):
 
     params = {
         'product': process['arguments']['id'],
-        'x': (process['arguments']['spatial_extent']['west'],
-              process['arguments']['spatial_extent']['east']),
-        'y': (process['arguments']['spatial_extent']['south'],
-              process['arguments']['spatial_extent']['north']),
-        'time': process['arguments']['temporal_extent'],
         'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000},
         }
+    if 'spatial_extent' in process['arguments'] and process['arguments']['spatial_extent'] is not None:
+        params['x'] = (process['arguments']['spatial_extent']['west'],process['arguments']['spatial_extent']['east'])
+        params['y'] = (process['arguments']['spatial_extent']['south'],process['arguments']['spatial_extent']['north'])
+    if 'temporal_extent' in process['arguments']['temporal_extent'] and process['arguments']['temporal_extent'] is not None:
+        params['time'] = process['arguments']['temporal_extent']
     if 'crs' in process['arguments']['spatial_extent']:
         params['crs'] = process['arguments']['spatial_extent']['crs']
     if 'bands' in process['arguments']:

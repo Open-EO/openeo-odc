@@ -56,13 +56,23 @@ def resolve_from_parameter(node):
 
 def create_job_header(odc_env: str, dask_url: str):
     """Create job imports."""
+    if odc_env is None:
+        return f"""from dask.distributed import Client
+    import datacube
+    import openeo_processes as oeop
 
-    return f"""from dask.distributed import Client
-import datacube
-import openeo_processes as oeop
+    # Initialize ODC instance
+    cube = datacube.Datacube()
+    # Connect to Dask Scheduler
+    client = Client('{dask_url}')
+    """
+    else:
+        return f"""from dask.distributed import Client
+    import datacube
+    import openeo_processes as oeop
 
-# Initialize ODC instance
-cube = datacube.Datacube(app='app_1', env='{odc_env}')
-# Connect to Dask Scheduler
-client = Client('{dask_url}')
-"""
+    # Initialize ODC instance
+    cube = datacube.Datacube(app='app_1', env='{odc_env}')
+    # Connect to Dask Scheduler
+    client = Client('{dask_url}')
+    """
