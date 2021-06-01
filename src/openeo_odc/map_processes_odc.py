@@ -4,6 +4,8 @@
 
 
 def map_load_collection(id, process):
+    from datetime import datetime
+    import numpy as np
     """ Map to load_collection process for ODC datacubes.
 
     Creates a string like the following:
@@ -25,11 +27,36 @@ def map_load_collection(id, process):
         'product': process['arguments']['id'],
         'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000},
         }
-    if 'spatial_extent' in process['arguments'] and process['arguments']['spatial_extent'] is not None:
-        params['x'] = (process['arguments']['spatial_extent']['west'],process['arguments']['spatial_extent']['east'])
-        params['y'] = (process['arguments']['spatial_extent']['south'],process['arguments']['spatial_extent']['north'])
-    if 'temporal_extent' in process['arguments']['temporal_extent'] and process['arguments']['temporal_extent'] is not None:
-        params['time'] = process['arguments']['temporal_extent']
+    if 'spatial_extent' in process['arguments']:
+        if process['arguments']['spatial_extent'] is not None:
+            if 'south' in process['arguments']['spatial_extent'] and \
+               'north' in process['arguments']['spatial_extent'] and \
+               'east'  in process['arguments']['spatial_extent'] and \
+               'west'  in process['arguments']['spatial_extent']:
+                params['x'] = (process['arguments']['spatial_extent']['west'],process['arguments']['spatial_extent']['east'])
+                params['y'] = (process['arguments']['spatial_extent']['south'],process['arguments']['spatial_extent']['north'])
+            elif 'coordinates' in process['arguments']['spatial_extent']:
+                # Pass coordinates to odc and process them there
+                # TODO: data has to be masked after loading with a polygon
+                polygon = process['arguments']['spatial_extent']['coordinates']
+                if polygon is not None:
+                    lowLat      = np.min([[el[1] for el in polygon[0]]])
+                    highLat     = np.max([[el[1] for el in polygon[0]]])
+                    lowLon      = np.min([[el[0] for el in polygon[0]]])
+                    highLon     = np.max([[el[0] for el in polygon[0]]])
+                    params['x'] = (lowLon,highLon)
+                    params['y'] = (lowLat,highLat)
+    if 'temporal_extent' in process['arguments']:
+        def exclusive_date(date):
+            return str(np.datetime64(date) - np.timedelta64(1, 'D')).split(' ')[0] # Substracts one day
+        if process['arguments']['temporal_extent'] is not None:
+            timeStart = '1970-01-01'
+            timeEnd   = str(datetime.now()).split(' ')[0] # Today is the default date for timeEnd, to include all the dates if not specified
+            if process['arguments']['temporal_extent'][0] is not None:
+                timeStart = process['arguments']['temporal_extent'][0]
+            if process['arguments']['temporal_extent'][1] is not None:
+                timeEnd = process['arguments']['temporal_extent'][1]
+            params['time'] = [timeStart,exclusive_date(timeEnd)] 
     if 'crs' in process['arguments']['spatial_extent']:
         params['crs'] = process['arguments']['spatial_extent']['crs']
     if 'bands' in process['arguments']:
