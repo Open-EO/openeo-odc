@@ -107,14 +107,15 @@ def map_data(id, process, kwargs):
     params = process['arguments']
     if 'result_node' in kwargs:
         params['data'] = kwargs['result_node']
-        params['reducer'] = {}
+        if process_name != 'apply':
+            params['reducer'] = {}
     else:
         params['data'] = convert_from_node_parameter(params['data'],
                                                      kwargs['from_parameter'])
     if 'dimension' in kwargs and not isinstance(params['data'], list):
         kwargs['dimension'] = check_dimension(kwargs['dimension'])
     elif 'dimension' in kwargs:
-        # Do not map 'dimension' for processes like `sum`
+        # Do not map 'dimension' for processes like `sum` and `apply`
         _ = kwargs.pop('dimension', None)
     _ = kwargs.pop('from_parameter', None)
     _ = kwargs.pop('result_node', None)
@@ -136,6 +137,9 @@ def convert_from_node_parameter(args_in, from_par=None):
         if isinstance(item, dict) and 'from_node' in item:
             args_in[k] = item['from_node']
         if from_par and isinstance(item, dict) and 'from_parameter' in item:
+            if item['from_parameter'] == 'x':
+                args_in[k] = from_par['data']  # This fixes error when using the apply process
+            else:
             args_in[k] = from_par[item['from_parameter']]
 
     if len(args_in) == 1:
