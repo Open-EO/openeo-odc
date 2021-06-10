@@ -4,6 +4,8 @@
 
 
 def map_load_collection(id, process):
+    from datetime import datetime
+    import numpy as np
     """ Map to load_collection process for ODC datacubes.
 
     Creates a string like the following:
@@ -23,13 +25,38 @@ def map_load_collection(id, process):
 
     params = {
         'product': process['arguments']['id'],
-        'x': (process['arguments']['spatial_extent']['west'],
-              process['arguments']['spatial_extent']['east']),
-        'y': (process['arguments']['spatial_extent']['south'],
-              process['arguments']['spatial_extent']['north']),
-        'time': process['arguments']['temporal_extent'],
         'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000},
         }
+    if 'spatial_extent' in process['arguments']:
+        if process['arguments']['spatial_extent'] is not None:
+            if 'south' in process['arguments']['spatial_extent'] and \
+               'north' in process['arguments']['spatial_extent'] and \
+               'east'  in process['arguments']['spatial_extent'] and \
+               'west'  in process['arguments']['spatial_extent']:
+                params['x'] = (process['arguments']['spatial_extent']['west'],process['arguments']['spatial_extent']['east'])
+                params['y'] = (process['arguments']['spatial_extent']['south'],process['arguments']['spatial_extent']['north'])
+            elif 'coordinates' in process['arguments']['spatial_extent']:
+                # Pass coordinates to odc and process them there
+                # TODO: data has to be masked after loading with a polygon
+                polygon = process['arguments']['spatial_extent']['coordinates']
+                if polygon is not None:
+                    lowLat      = np.min([[el[1] for el in polygon[0]]])
+                    highLat     = np.max([[el[1] for el in polygon[0]]])
+                    lowLon      = np.min([[el[0] for el in polygon[0]]])
+                    highLon     = np.max([[el[0] for el in polygon[0]]])
+                    params['x'] = (lowLon,highLon)
+                    params['y'] = (lowLat,highLat)
+    if 'temporal_extent' in process['arguments']:
+        def exclusive_date(date):
+            return str(np.datetime64(date) - np.timedelta64(1, 'D')).split(' ')[0] # Substracts one day
+        if process['arguments']['temporal_extent'] is not None:
+            timeStart = '1970-01-01'
+            timeEnd   = str(datetime.now()).split(' ')[0] # Today is the default date for timeEnd, to include all the dates if not specified
+            if process['arguments']['temporal_extent'][0] is not None:
+                timeStart = process['arguments']['temporal_extent'][0]
+            if process['arguments']['temporal_extent'][1] is not None:
+                timeEnd = process['arguments']['temporal_extent'][1]
+            params['time'] = [timeStart,exclusive_date(timeEnd)] 
     if 'crs' in process['arguments']['spatial_extent']:
         params['crs'] = process['arguments']['spatial_extent']['crs']
     if 'bands' in process['arguments']:
@@ -80,14 +107,15 @@ def map_data(id, process, kwargs):
     params = process['arguments']
     if 'result_node' in kwargs:
         params['data'] = kwargs['result_node']
-        params['reducer'] = {}
+        if process_name != 'apply':
+            params['reducer'] = {}
     else:
         params['data'] = convert_from_node_parameter(params['data'],
                                                      kwargs['from_parameter'])
     if 'dimension' in kwargs and not isinstance(params['data'], list):
         kwargs['dimension'] = check_dimension(kwargs['dimension'])
     elif 'dimension' in kwargs:
-        # Do not map 'dimension' for processes like `sum`
+        # Do not map 'dimension' for processes like `sum` and `apply`
         _ = kwargs.pop('dimension', None)
     _ = kwargs.pop('from_parameter', None)
     _ = kwargs.pop('result_node', None)
@@ -109,6 +137,9 @@ def convert_from_node_parameter(args_in, from_par=None):
         if isinstance(item, dict) and 'from_node' in item:
             args_in[k] = item['from_node']
         if from_par and isinstance(item, dict) and 'from_parameter' in item:
+            if item['from_parameter'] == 'x':
+                args_in[k] = from_par['data']  # This fixes error when using the apply process
+            else:
             args_in[k] = from_par[item['from_parameter']]
 
     if len(args_in) == 1:

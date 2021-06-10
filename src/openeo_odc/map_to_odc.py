@@ -18,8 +18,9 @@ def map_to_odc(graph, odc_env, odc_url):
         kwargs['from_parameter'] = resolve_from_parameter(cur_node)
         if len(cur_node.result_processes) == 1:
             kwargs['result_node'] = cur_node.result_processes[0].id
-        if cur_node.parent_process:
-            kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
+        if cur_node.parent_process: #parent process can be eiter reduce_dimension or apply
+            if cur_node.parent_process.process_id == 'reduce_dimension':
+                kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
         if tuple(cur_node.arguments.keys()) == ('x', 'y'):
             nodes[cur_node.id] = map_xy(cur_node.id, cur_node.content)
         elif 'data' in tuple(cur_node.arguments.keys()):
@@ -56,13 +57,23 @@ def resolve_from_parameter(node):
 
 def create_job_header(odc_env: str, dask_url: str):
     """Create job imports."""
+    if odc_env is None:
+        return f"""from dask.distributed import Client
+    import datacube
+    import openeo_processes as oeop
 
-    return f"""from dask.distributed import Client
-import datacube
-import openeo_processes as oeop
+    # Initialize ODC instance
+    cube = datacube.Datacube()
+    # Connect to Dask Scheduler
+    client = Client('{dask_url}')
+    """
+    else:
+        return f"""from dask.distributed import Client
+    import datacube
+    import openeo_processes as oeop
 
-# Initialize ODC instance
-cube = datacube.Datacube(app='app_1', env='{odc_env}')
-# Connect to Dask Scheduler
-client = Client('{dask_url}')
-"""
+    # Initialize ODC instance
+    cube = datacube.Datacube(app='app_1', env='{odc_env}')
+    # Connect to Dask Scheduler
+    client = Client('{dask_url}')
+    """
