@@ -1,11 +1,11 @@
 """
 
 """
+from datetime import datetime
+import numpy as np
 
 
 def map_load_collection(id, process):
-    from datetime import datetime
-    import numpy as np
     """ Map to load_collection process for ODC datacubes.
 
     Creates a string like the following:
