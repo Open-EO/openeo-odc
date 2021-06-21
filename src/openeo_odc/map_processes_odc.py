@@ -48,7 +48,7 @@ def map_load_collection(id, process):
                     params['y'] = (lowLat,highLat)
     if 'temporal_extent' in process['arguments']:
         def exclusive_date(date):
-            return str(np.datetime64(date) - np.timedelta64(1, 'D')).split(' ')[0] # Substracts one day
+            return str(np.datetime64(date) - np.timedelta64(1, 'D')) + 'Z' # Substracts one day
         if process['arguments']['temporal_extent'] is not None:
             timeStart = '1970-01-01'
             timeEnd   = str(datetime.now()).split(' ')[0] # Today is the default date for timeEnd, to include all the dates if not specified
@@ -63,7 +63,7 @@ def map_load_collection(id, process):
         params['measurements'] = process['arguments']['bands']
 
     return f"""
-{id} = oeop.load_collection(odc_cube=cube, **{params})
+{'_'+id} = oeop.load_collection(odc_cube=cube, **{params})
 """
 
 
@@ -83,13 +83,13 @@ def map_xy(id, process):
         'y': process['arguments']['y']
     }
     if isinstance(params['x'], dict) and 'from_node' in params['x']:
-        params['x'] = params['x']['from_node']
+        params['x'] = '_' + params['x']['from_node']
     if isinstance(params['y'], dict) and 'from_node' in params['y']:
-        params['y'] = params['y']['from_node']
+        params['y'] = '_' + params['y']['from_node']
     params = convert_from_node_parameter(params)
     params_str = create_string(params)
 
-    return f"""{id} = oeop.{process_name}({params_str})
+    return f"""{'_'+id} = oeop.{process_name}({params_str})
 """
 
 
@@ -106,12 +106,12 @@ def map_data(id, process, kwargs):
     process_name = process['process_id']
     params = process['arguments']
     if 'result_node' in kwargs:
-        params['data'] = kwargs['result_node']
+        params['data'] = '_' + kwargs['result_node']
         if process_name != 'apply':
             params['reducer'] = {}
     else:
-        params['data'] = convert_from_node_parameter(params['data'],
-                                                     kwargs['from_parameter'])
+        params['data'] = '_' + convert_from_node_parameter(params['data'],
+                                                     kwargs['from_parameter'])    
     if 'dimension' in kwargs and not isinstance(params['data'], list):
         kwargs['dimension'] = check_dimension(kwargs['dimension'])
     elif 'dimension' in kwargs:
@@ -122,8 +122,7 @@ def map_data(id, process, kwargs):
     params = {**params, **kwargs}
 
     params_str = create_string(params)
-
-    return f"""{id} = oeop.{process_name}({params_str})
+    return f"""{'_'+id} = oeop.{process_name}({params_str})
 """
 
 
