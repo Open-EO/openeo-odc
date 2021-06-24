@@ -46,20 +46,24 @@ def map_load_collection(id, process):
                     highLon     = np.max([[el[0] for el in polygon[0]]])
                     params['x'] = (lowLon,highLon)
                     params['y'] = (lowLat,highLat)
+    params['time'] = []
     if 'temporal_extent' in process['arguments']:
         def exclusive_date(date):
-            return str(np.datetime64(date) - np.timedelta64(1, 'D')).split(' ')[0] # Substracts one day
+            return str(np.datetime64(date) - np.timedelta64(1, 'D')) + 'Z' # Substracts one day
         if process['arguments']['temporal_extent'] is not None:
-            timeStart = '1970-01-01'
-            timeEnd   = str(datetime.now()).split(' ')[0] # Today is the default date for timeEnd, to include all the dates if not specified
-            if process['arguments']['temporal_extent'][0] is not None:
+            if len(process['arguments']['temporal_extent'])>0:
+                timeStart = '1970-01-01'
+                timeEnd   = str(datetime.now()).split(' ')[0] # Today is the default date for timeEnd, to include all the dates if not specified
+                if process['arguments']['temporal_extent'][0] is not None:
                 timeStart = process['arguments']['temporal_extent'][0]
             if process['arguments']['temporal_extent'][1] is not None:
                 timeEnd = process['arguments']['temporal_extent'][1]
             params['time'] = [timeStart,exclusive_date(timeEnd)] 
     if 'crs' in process['arguments']['spatial_extent']:
         params['crs'] = process['arguments']['spatial_extent']['crs']
+    params['measurements'] = []
     if 'bands' in process['arguments']:
+        if len(process['arguments']['bands'])>0:
         params['measurements'] = process['arguments']['bands']
 
     return f"""
@@ -111,6 +115,8 @@ def map_data(id, process, kwargs):
             params['reducer'] = {}
     else:
         params['data'] = convert_from_node_parameter(params['data'],
+    if 'target' in params: #target is used in resample_cube_spatial for example
+        params['target'] = convert_from_node_parameter(params['target'],
                                                      kwargs['from_parameter'])
     if 'dimension' in kwargs and not isinstance(params['data'], list):
         kwargs['dimension'] = check_dimension(kwargs['dimension'])
@@ -174,7 +180,7 @@ def create_string(dict_input):
     inputs = []
     to_remove = []
     for key, value in dict_input.items():
-        if key in ('x', 'y', 'data'):
+        if key in ('x', 'y', 'data','target'):
             to_remove.append(key)
             if isinstance(value, list):
                 val_str = "["
