@@ -132,7 +132,8 @@ def convert_from_node_parameter(args_in, from_par=None):
         if from_par and isinstance(item, dict) and 'from_parameter' in item:
             if item['from_parameter'] == 'x':
                 args_in[k] = from_par['data']  # This fixes error when using the apply process
-            args_in[k] = from_par[item['from_parameter']]
+            else:
+                args_in[k] = from_par[item['from_parameter']]
 
     if len(args_in) == 1:
         args_in = args_in[0]
