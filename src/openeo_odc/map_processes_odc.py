@@ -105,7 +105,8 @@ def map_data(id, process, kwargs):
         if process_name != 'apply':
             params['reducer'] = {}
     else:
-        params['data'] = convert_from_node_parameter(params['data'])
+        params['data'] = convert_from_node_parameter(params['data'],
+                                                     kwargs['from_parameter'])
     if 'target' in params: #target is used in resample_cube_spatial for example
         params['target'] = convert_from_node_parameter(params['target'],
                                                      kwargs['from_parameter'])
