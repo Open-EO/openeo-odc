@@ -1,11 +1,11 @@
 """
 
 """
+from datetime import datetime
+import numpy as np
 
 
 def map_load_collection(id, process):
-    from datetime import datetime
-    import numpy as np
     """ Map to load_collection process for ODC datacubes.
 
     Creates a string like the following:
@@ -71,31 +71,24 @@ def map_load_collection(id, process):
 """
 
 
-def map_xy(id, process):
-    """Map to xarray version of processes with input (x, y).
+def map_required(id, process) -> str:
+    """Map processes with required arguments only.
 
-    Creates a string like the following:
-    mul_6 = oeop.subtract(**{'x': dep_1, 'y': dep_2})
+    Currently processes with params ('x', 'y'), ('data', 'value'), ('base', 'p'), and ('x') are supported.
+    Creates a string like the following: sub_6 = oeop.subtract(**{'x': dep_1, 'y': dep_2})
 
     Returns: str
-
     """
-
     process_name = process['process_id']
-    params = {
-        'x': process['arguments']['x'],
-        'y': process['arguments']['y']
-    }
-    if isinstance(params['x'], dict) and 'from_node' in params['x']:
-        params['x'] = params['x']['from_node']
-    if isinstance(params['y'], dict) and 'from_node' in params['y']:
-        params['y'] = params['y']['from_node']
+    params = {arg_name: arg_value for arg_name, arg_value in process['arguments'].items()}
+    for key, value in params.items():
+        if isinstance(value, dict) and 'from_node' in value:
+            params[key] = value['from_node']
     params = convert_from_node_parameter(params)
     params_str = create_string(params)
 
     return f"""{id} = oeop.{process_name}({params_str})
 """
-
 
 def map_data(id, process, kwargs):
     """Map to xarray version of processes with input (data, param_1, ?param2, ...).
@@ -146,7 +139,7 @@ def convert_from_node_parameter(args_in, from_par=None):
             if item['from_parameter'] == 'x':
                 args_in[k] = from_par['data']  # This fixes error when using the apply process
             else:
-            args_in[k] = from_par[item['from_parameter']]
+                args_in[k] = from_par[item['from_parameter']]
 
     if len(args_in) == 1:
         args_in = args_in[0]
@@ -180,7 +173,7 @@ def create_string(dict_input):
     inputs = []
     to_remove = []
     for key, value in dict_input.items():
-        if key in ('x', 'y', 'data','target'):
+        if key in ('x', 'y', 'data', 'value', 'base', 'p','target'):
             to_remove.append(key)
             if isinstance(value, list):
                 val_str = "["

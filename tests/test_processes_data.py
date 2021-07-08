@@ -1,9 +1,11 @@
 """
 Tests processes with input type func(data, **kwargs)
 """
-
+import pytest
 from pytest import mark
 from openeo_odc.map_processes_odc import map_data
+
+from tests.utils import create_params
 
 
 @mark.parametrize("node_id, process_def, kwargs, process_ref",
