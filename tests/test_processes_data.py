@@ -12,21 +12,21 @@ from tests.utils import create_params
     [
         (
             "nir_1",
-            {'process_id': 'array_element', 'arguments': {'data': 'dc_0', 'index': 0}},
+            {'process_id': 'array_element', 'arguments': {'data': {'from_parameter': 'data'}, 'index': 0}},
             {'from_parameter': {'data': 'dc_0'}, 'dimension': 'spectral'},
-            "nir_1 = oeop.array_element(**{'data': dc_0, 'index': 0, 'dimension': 'bands'})\n"
+            "_nir_1 = oeop.array_element(**{'data': _dc_0, 'index': 0, 'dimension': 'bands'})\n"
         ),
         (
             "nir_2",
-            {'process_id': 'array_element', 'arguments': {'data': 'dc_0', 'label': 'nir'}},
+            {'process_id': 'array_element', 'arguments': {'data': {'from_parameter': 'data'}, 'label': 'nir'}},
             {'from_parameter': {'data': 'dc_0'}, 'dimension': 'spectral'},
-            "nir_2 = oeop.array_element(**{'data': dc_0, 'label': 'nir', 'dimension': 'bands'})\n"
+            "_nir_2 = oeop.array_element(**{'data': _dc_0, 'label': 'nir', 'dimension': 'bands'})\n"
         ),
         (
             "nir_3",
-            {'process_id': 'array_element', 'arguments': {'data': 'dc_0', 'label': 'nir', 'return_nodata': True}},
+            {'process_id': 'array_element', 'arguments': {'data': {'from_parameter': 'data'}, 'label': 'nir', 'return_nodata': True}},
             {'from_parameter': {'data': 'dc_0'}, 'dimension': 'spectral'},
-            "nir_3 = oeop.array_element(**{'data': dc_0, 'label': 'nir', 'return_nodata': True, 'dimension': 'bands'})\n"
+            "_nir_3 = oeop.array_element(**{'data': _dc_0, 'label': 'nir', 'return_nodata': True, 'dimension': 'bands'})\n"
         ),
     ]
 )
