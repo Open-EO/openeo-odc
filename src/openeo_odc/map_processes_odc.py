@@ -3,6 +3,7 @@
 """
 from datetime import datetime
 import numpy as np
+from copy import deepcopy
 
 
 def map_load_collection(id, process):
@@ -67,7 +68,7 @@ def map_load_collection(id, process):
 """
 
 
-def map_required(id, process) -> str:
+def map_required(id, process, kwargs=None) -> str:
     """Map processes with required arguments only.
 
     Currently processes with params ('x', 'y'), ('data', 'value'), ('base', 'p'), and ('x') are supported.
@@ -76,11 +77,10 @@ def map_required(id, process) -> str:
     Returns: str
     """
     process_name = process['process_id']
-    params = {arg_name: arg_value for arg_name, arg_value in process['arguments'].items()}
-    for key, value in params.items():
-        if isinstance(value, dict) and 'from_node' in value:
-            params[key] = value['from_node']
-    params = convert_from_node_parameter(params)
+    params = deepcopy(process['arguments'])
+    from_param = kwargs['from_parameter'] if kwargs and 'from_parameter' in kwargs else None
+    for key in params:
+        params[key] = convert_from_node_parameter(params[key], from_param)
     params_str = create_string(params)
 
     return f"""{id} = oeop.{process_name}({params_str})
