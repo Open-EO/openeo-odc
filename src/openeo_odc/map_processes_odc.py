@@ -111,7 +111,7 @@ def map_data(id, process, kwargs):
             params['reducer'] = {}
     else:
         params['data'] = '_' + convert_from_node_parameter(params['data'],
-                                                     kwargs['from_parameter'])    
+                                                     kwargs['from_parameter'])
     if 'dimension' in kwargs and not isinstance(params['data'], list):
         kwargs['dimension'] = check_dimension(kwargs['dimension'])
     elif 'dimension' in kwargs:
