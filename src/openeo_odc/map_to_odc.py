@@ -21,7 +21,7 @@ def map_to_odc(graph, odc_env, odc_url):
         if cur_node.parent_process: #parent process can be eiter reduce_dimension or apply
             if cur_node.parent_process.process_id == 'reduce_dimension':
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
-        if tuple(cur_node.arguments.keys()) in [('x', 'y'), ('x',), ('data', 'value'), ('base', 'p')]:
+        if set(cur_node.arguments.keys()) in [{'x', 'y'}, {'x', }, {'data', 'value'}, {'base', 'p'}]:
             nodes[cur_node.id] = map_required(cur_node.id, cur_node.content, kwargs)
         elif 'data' in tuple(cur_node.arguments.keys()):
             nodes[cur_node.id] = map_data(cur_node.id, cur_node.content, kwargs)
