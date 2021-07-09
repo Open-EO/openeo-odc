@@ -49,7 +49,7 @@ def map_load_collection(id, process):
     params['time'] = []
     if 'temporal_extent' in process['arguments']:
         def exclusive_date(date):
-            return str(np.datetime64(date) - np.timedelta64(1, 'D')) + 'Z' # Substracts one day
+            return np.datetime_as_string(np.datetime64(date) - np.timedelta64(1, 'D'), timezone='UTC') # Substracts one day
         if process['arguments']['temporal_extent'] is not None and len(process['arguments']['temporal_extent'])>0:
             timeStart = '1970-01-01'
             timeEnd   = str(datetime.now()).split(' ')[0] # Today is the default date for timeEnd, to include all the dates if not specified
