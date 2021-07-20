@@ -65,7 +65,7 @@ def map_load_collection(id, process):
         params['measurements'] = process['arguments']['bands']
 
     return f"""
-{id} = oeop.load_collection(odc_cube=cube, **{params})
+{'_'+id} = oeop.load_collection(odc_cube=cube, **{params})
 """
 
 
@@ -81,11 +81,11 @@ def map_required(id, process) -> str:
     params = {arg_name: arg_value for arg_name, arg_value in process['arguments'].items()}
     for key, value in params.items():
         if isinstance(value, dict) and 'from_node' in value:
-            params[key] = value['from_node']
+            params[key] = '_' + value['from_node']
     params = convert_from_node_parameter(params)
     params_str = create_string(params)
 
-    return f"""{id} = oeop.{process_name}({params_str})
+    return f"""{'_'+id} = oeop.{process_name}({params_str})
 """
 
 def map_data(id, process, kwargs):
@@ -101,7 +101,7 @@ def map_data(id, process, kwargs):
     process_name = process['process_id']
     params = process['arguments']
     if 'result_node' in kwargs:
-        params['data'] = kwargs['result_node']
+        params['data'] = '_' + kwargs['result_node']
         if process_name != 'apply':
             params['reducer'] = {}
     else:
@@ -120,8 +120,7 @@ def map_data(id, process, kwargs):
     params = {**params, **kwargs}
 
     params_str = create_string(params)
-
-    return f"""{id} = oeop.{process_name}({params_str})
+    return f"""{'_'+id} = oeop.{process_name}({params_str})
 """
 
 
@@ -133,12 +132,12 @@ def convert_from_node_parameter(args_in, from_par=None):
 
     for k, item in enumerate(args_in):
         if isinstance(item, dict) and 'from_node' in item:
-            args_in[k] = item['from_node']
+            args_in[k] = '_' + item['from_node']
         if from_par and isinstance(item, dict) and 'from_parameter' in item:
             if item['from_parameter'] == 'x':
-                args_in[k] = from_par['data']  # This fixes error when using the apply process
+                args_in[k] = '_' + from_par['data']  # This fixes error when using the apply process
             else:
-                args_in[k] = from_par[item['from_parameter']]
+                args_in[k] = '_' + from_par[item['from_parameter']]
 
     if len(args_in) == 1:
         args_in = args_in[0]

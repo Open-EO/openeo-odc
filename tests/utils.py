@@ -5,7 +5,7 @@ def create_params(node_id: str, args_in: Dict[str, Any], args_out: str) -> Tuple
     """Format input and expected output of process."""
     return node_id, \
         {"process_id": "PLACEHOLDER", "arguments": args_in}, \
-        f"{node_id} = oeop.PLACEHOLDER(**{args_out})\n"
+        f"_{node_id} = oeop.PLACEHOLDER(**{args_out})\n"
 
 
 def set_process(node_id: str, process_def: Dict[str, Any], process_ref: str, process_name: str) \

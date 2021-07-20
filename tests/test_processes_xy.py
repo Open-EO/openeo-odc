@@ -12,8 +12,8 @@ from tests.utils import create_params, set_process
 @pytest.fixture(
     params=[
         ({'x': 3, 'y': 6}, "{'x': 3,'y': 6}"),
-        ({'x': {'from_node': 'red_3'}, 'y': 6}, "{'x': red_3,'y': 6}"),
-        ({'x': {'from_node': 'red_3'}, 'y': {'from_node': 'blue_2'}}, "{'x': red_3,'y': blue_2}"),
+        ({'x': {'from_node': 'red_3'}, 'y': 6}, "{'x': _red_3,'y': 6}"),
+        ({'x': {'from_node': 'red_3'}, 'y': {'from_node': 'blue_2'}}, "{'x': _red_3,'y': _blue_2}"),
     ]
 )
 def get_xy_param(request):
@@ -23,7 +23,7 @@ def get_xy_param(request):
 @pytest.fixture(
     params=[
         ({'x': 3}, "{'x': 3}"),
-        ({'x': {'from_node': 'red_3'}}, "{'x': red_3}"),
+        ({'x': {'from_node': 'red_3'}}, "{'x': _red_3}"),
     ]
 )
 def get_x_param(request):
@@ -35,8 +35,8 @@ def get_x_param(request):
         ({'data': [1, 2, 3, 4], 'value': 4}, "{'data': [1, 2, 3, 4],'value': 4}"),
         # ({'data': ['1', '2', '3', '4'], 'value': '4'}, "{'data': ['1', '2', '3', '4'],'value': '4'}"),
         # ({'data': ['this', 'is', 'a', 'test'], 'value': 'test'}, "{'data': ['this', 'is', 'a', 'test'],'value': 'test'}"),
-        ({'data': {'from_node': 'red_3'}, 'value': 4}, "{'data': red_3,'value': 4}"),
-        ({'data': [1, 2, 3, 4], 'value': {'from_node': 'blue_2'}}, "{'data': [1, 2, 3, 4],'value': blue_2}"),
+        ({'data': {'from_node': 'red_3'}, 'value': 4}, "{'data': _red_3,'value': 4}"),
+        ({'data': [1, 2, 3, 4], 'value': {'from_node': 'blue_2'}}, "{'data': [1, 2, 3, 4],'value': _blue_2}"),
     ]
 )
 def get_data_val_param(request):
@@ -117,9 +117,9 @@ def test_data_value(process: str, get_data_val_param: Tuple[str, Dict[str, Any],
 @pytest.mark.parametrize("arg_in,arg_out", (
         ({'base': 4, 'p': 2}, "{'base': 4,'p': 2}"),
         ({'base': 4.1, 'p': 2.9}, "{'base': 4.1,'p': 2.9}"),
-        ({'base': {'from_node': 'red_3'}, 'p': 4}, "{'base': red_3,'p': 4}"),
-        ({'base': 4, 'p': {'from_node': 'blue_2'}}, "{'base': 4,'p': blue_2}"),
-        ({'base': {'from_node': 'red_3'}, 'p': {'from_node': 'blue_2'}}, "{'base': red_3,'p': blue_2}"),
+        ({'base': {'from_node': 'red_3'}, 'p': 4}, "{'base': _red_3,'p': 4}"),
+        ({'base': 4, 'p': {'from_node': 'blue_2'}}, "{'base': 4,'p': _blue_2}"),
+        ({'base': {'from_node': 'red_3'}, 'p': {'from_node': 'blue_2'}}, "{'base': _red_3,'p': _blue_2}"),
 ))
 def test_power(arg_in: Dict[str, Any], arg_out: str):
     """Test conversions of power process with input base, p."""
