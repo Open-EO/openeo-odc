@@ -7,7 +7,7 @@ cube = datacube.Datacube(app='app_1', env='default')
 # Connect to Dask Scheduler
 client = Client('tcp://xx.yyy.zz.kk:8786')
 
-dc_0 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}, 'x': (9.9, 10.0), 'y': (46.5, 46.6), 'time': ['2018-06-15', '2018-06-16'], 'measurements': ['B08', 'B04', 'B02']})
+dc_0 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}, 'x': (9.9, 10.0), 'y': (46.5, 46.6), 'time': ['2018-06-15T00:00:00Z', '2018-06-16T00:00:00Z'], 'measurements': ['B08', 'B04', 'B02']})
 nir_2 = oeop.array_element(**{'data': dc_0, 'index': 0, 'dimension': 'bands'})
 red_3 = oeop.array_element(**{'data': dc_0, 'index': 1, 'dimension': 'bands'})
 blue_4 = oeop.array_element(**{'data': dc_0, 'index': 2, 'dimension': 'bands'})
