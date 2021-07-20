@@ -47,10 +47,11 @@ def map_load_collection(id, process):
                     highLon     = np.max([[el[0] for el in polygon[0]]])
                     params['x'] = (lowLon,highLon)
                     params['y'] = (lowLat,highLat)
+    params['time'] = []
     if 'temporal_extent' in process['arguments']:
         def exclusive_date(date):
-            return str(np.datetime64(date) - np.timedelta64(1, 'D')).split(' ')[0] # Substracts one day
-        if process['arguments']['temporal_extent'] is not None:
+            return np.datetime_as_string(np.datetime64(date) - np.timedelta64(1, 'D'), timezone='UTC') # Substracts one day
+        if process['arguments']['temporal_extent'] is not None and len(process['arguments']['temporal_extent'])>0:
             timeStart = '1970-01-01'
             timeEnd   = str(datetime.now()).split(' ')[0] # Today is the default date for timeEnd, to include all the dates if not specified
             if process['arguments']['temporal_extent'][0] is not None:
@@ -60,11 +61,12 @@ def map_load_collection(id, process):
             params['time'] = [timeStart,exclusive_date(timeEnd)] 
     if 'crs' in process['arguments']['spatial_extent']:
         params['crs'] = process['arguments']['spatial_extent']['crs']
-    if 'bands' in process['arguments']:
+    params['measurements'] = []
+    if 'bands' in process['arguments'] and len(process['arguments']['bands'])>0:
         params['measurements'] = process['arguments']['bands']
 
     return f"""
-{id} = oeop.load_collection(odc_cube=cube, **{params})
+{'_'+id} = oeop.load_collection(odc_cube=cube, **{params})
 """
 
 
@@ -83,7 +85,7 @@ def map_required(id, process, kwargs=None) -> str:
         params[key] = convert_from_node_parameter(params[key], from_param)
     params_str = create_string(params)
 
-    return f"""{id} = oeop.{process_name}({params_str})
+    return f"""{'_'+id} = oeop.{process_name}({params_str})
 """
 
 def map_data(id, process, kwargs):
@@ -99,11 +101,14 @@ def map_data(id, process, kwargs):
     process_name = process['process_id']
     params = process['arguments']
     if 'result_node' in kwargs:
-        params['data'] = kwargs['result_node']
+        params['data'] = '_' + kwargs['result_node']
         if process_name != 'apply':
             params['reducer'] = {}
     else:
         params['data'] = convert_from_node_parameter(params['data'],
+                                                     kwargs['from_parameter'])
+    if 'target' in params: #target is used in resample_cube_spatial for example
+        params['target'] = convert_from_node_parameter(params['target'],
                                                      kwargs['from_parameter'])
     if 'dimension' in kwargs and not isinstance(params['data'], list):
         kwargs['dimension'] = check_dimension(kwargs['dimension'])
@@ -115,8 +120,7 @@ def map_data(id, process, kwargs):
     params = {**params, **kwargs}
 
     params_str = create_string(params)
-
-    return f"""{id} = oeop.{process_name}({params_str})
+    return f"""{'_'+id} = oeop.{process_name}({params_str})
 """
 
 
@@ -128,12 +132,12 @@ def convert_from_node_parameter(args_in, from_par=None):
 
     for k, item in enumerate(args_in):
         if isinstance(item, dict) and 'from_node' in item:
-            args_in[k] = item['from_node']
+            args_in[k] = '_' + item['from_node']
         if from_par \
                 and isinstance(item, dict) \
                 and 'from_parameter' in item \
                 and item['from_parameter'] in from_par.keys():
-            args_in[k] = from_par[item['from_parameter']]
+            args_in[k] = '_' + from_par[item['from_parameter']]
 
     if len(args_in) == 1:
         args_in = args_in[0]
@@ -167,7 +171,7 @@ def create_string(dict_input):
     inputs = []
     to_remove = []
     for key, value in dict_input.items():
-        if key in ('x', 'y', 'data', 'value', 'base', 'p'):
+        if key in ('x', 'y', 'data', 'value', 'base', 'p','target'):
             to_remove.append(key)
             if isinstance(value, list):
                 val_str = "["
