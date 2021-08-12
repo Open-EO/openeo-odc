@@ -24,7 +24,9 @@ def map_to_odc(graph, odc_env, odc_url):
         if set(cur_node.arguments.keys()) in [{'x', 'y'}, {'x', }, {'data', 'value'}, {'base', 'p'}]:
             nodes[cur_node.id] = map_required(cur_node.id, cur_node.content, kwargs)
         elif 'data' in tuple(cur_node.arguments.keys()):
-            nodes[cur_node.id] = map_data(cur_node.id, cur_node.content, kwargs)
+            nodes[cur_node.id] = map_required(cur_node.id, cur_node.content, kwargs)
+        elif 'min' in tuple(cur_node.arguments.keys()):
+            nodes[cur_node.id] = map_required(cur_node.id, cur_node.content, kwargs)
         elif 'id' in tuple(cur_node.arguments.keys()):
             # This should be only load_collection
             nodes[cur_node.id] = map_load_collection(cur_node.id, cur_node.content)
@@ -52,7 +54,18 @@ def resolve_from_parameter(node):
             # Argument is not iterable (e.g. 1 or None)
             continue
         if 'from_parameter' in node.arguments[argument]:
-            in_nodes[argument] = node.parent_process.arguments['data']['from_node']
+            if argument == 'data':
+                in_nodes['data'] = node.parent_process.arguments['data']['from_node']
+                try:
+                    in_nodes['parameters'] = node.parent_process.arguments['parameters']
+                except:
+                    continue
+            elif argument == 'x':
+                in_nodes[argument] = node.parent_process.arguments['data']['from_node']
+            elif argument == 'x':
+                in_nodes[argument] = node.arguments['x']['from_parameter']
+            elif argument == 'y':
+                in_nodes['x'] = node.arguments['x']['from_node']
 
     return in_nodes
 

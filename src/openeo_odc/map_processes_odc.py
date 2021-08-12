@@ -62,7 +62,7 @@ def map_load_collection(id, process):
     if 'crs' in process['arguments']['spatial_extent']:
         params['crs'] = process['arguments']['spatial_extent']['crs']
     params['measurements'] = []
-    if 'bands' in process['arguments'] and len(process['arguments']['bands'])>0:
+    if 'bands' in process['arguments'] and not process['arguments']['bands'] is None and len(process['arguments']['bands'])>0:
         params['measurements'] = process['arguments']['bands']
 
     return f"""
@@ -78,14 +78,30 @@ def map_required(id, process, kwargs=None) -> str:
 
     Returns: str
     """
+    if kwargs is None:
+        kwargs = {}
     process_name = process['process_id']
     params = deepcopy(process['arguments'])
     from_param = kwargs['from_parameter'] if kwargs and 'from_parameter' in kwargs else None
+    if 'result_node' in kwargs:
+        params['data'] = '_' + kwargs['result_node']
+        if process_name != 'apply':
+            params['reducer'] = {}
+        _ = kwargs.pop('result_node', None)
     for key in params:
         params[key] = convert_from_node_parameter(params[key], from_param)
-    params_str = create_string(params)
 
-    return f"""{'_'+id} = oeop.{process_name}({params_str})
+    if 'data' in params:
+        if 'dimension' in kwargs and not isinstance(params['data'], list):
+            kwargs['dimension'] = check_dimension(kwargs['dimension'])
+        elif 'dimension' in kwargs:
+            # Do not map 'dimension' for processes like `sum` and `apply`
+            _ = kwargs.pop('dimension', None)
+        _ = kwargs.pop('from_parameter', None)
+        params = {**params, **kwargs}
+
+    params_str = create_string(params)
+    return f"""{'_' + id} = oeop.{process_name}({params_str})
 """
 
 def map_data(id, process, kwargs):
@@ -137,7 +153,10 @@ def convert_from_node_parameter(args_in, from_par=None):
                 and isinstance(item, dict) \
                 and 'from_parameter' in item \
                 and item['from_parameter'] in from_par.keys():
-            args_in[k] = '_' + from_par[item['from_parameter']]
+            if isinstance(from_par[item['from_parameter']], str):
+                args_in[k] = '_' + from_par[item['from_parameter']]
+            else:
+                args_in[k] = from_par[item['from_parameter']]
 
     if len(args_in) == 1:
         args_in = args_in[0]
@@ -171,7 +190,7 @@ def create_string(dict_input):
     inputs = []
     to_remove = []
     for key, value in dict_input.items():
-        if key in ('x', 'y', 'data', 'value', 'base', 'p','target'):
+        if key in ('x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process'):
             to_remove.append(key)
             if isinstance(value, list):
                 val_str = "["
@@ -186,7 +205,7 @@ def create_string(dict_input):
     for key in to_remove:
         _ = dict_input.pop(key)
 
-    replace_str = '{' + ','.join(inputs)
+    replace_str = '{' + ', '.join(inputs)
     if dict_input:
         replace_str += ', '
 

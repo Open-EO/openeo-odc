@@ -3,7 +3,7 @@ Tests processes with input type func(data, **kwargs)
 """
 import pytest
 from pytest import mark
-from openeo_odc.map_processes_odc import map_data
+from openeo_odc.map_processes_odc import map_data, map_required
 
 from tests.utils import create_params
 
@@ -28,10 +28,17 @@ from tests.utils import create_params
             {'from_parameter': {'data': 'dc_0'}, 'dimension': 'spectral'},
             "_nir_3 = oeop.array_element(**{'data': _dc_0, 'label': 'nir', 'return_nodata': True, 'dimension': 'bands'})\n"
         ),
+        (
+                "fit_1",
+                {'process_id': 'fit_curve', 'arguments': {'data': {'from_parameter': 'data'}, 'parameters': (0, 1, 0.5),
+                                                          'function': {'from_parameter': 'function'}}},
+                {'from_parameter': {'data': 'dc_0', 'function': 'udf'}, 'dimension': 'time'},
+                "_fit_1 = oeop.fit_curve(**{'data': _dc_0, 'parameters': (0, 1, 0.5), 'function': _udf, 'dimension': 'time'})\n"
+        ),
     ]
 )
 def test_array_element(node_id, process_def, kwargs, process_ref):
     """Test all `array_element` conversions."""
 
-    out = map_data(node_id, process_def, kwargs)
+    out = map_required(node_id, process_def, kwargs)
     assert out == process_ref
