@@ -62,7 +62,7 @@ def map_load_collection(id, process):
     if 'crs' in process['arguments']['spatial_extent']:
         params['crs'] = process['arguments']['spatial_extent']['crs']
     params['measurements'] = []
-    if 'bands' in process['arguments'] and not process['arguments']['bands'] is None and len(process['arguments']['bands'])>0:
+    if 'bands' in process['arguments'] and process['arguments']['bands'] is not None and len(process['arguments']['bands'])>0:
         params['measurements'] = process['arguments']['bands']
 
     return f"""
@@ -70,7 +70,7 @@ def map_load_collection(id, process):
 """
 
 
-def map_required(id, process, kwargs=None) -> str:
+def map_general(id, process, kwargs=None) -> str:
     """Map processes with required arguments only.
 
     Currently processes with params ('x', 'y'), ('data', 'value'), ('base', 'p'), and ('x') are supported.
@@ -84,10 +84,11 @@ def map_required(id, process, kwargs=None) -> str:
     params = deepcopy(process['arguments'])
     from_param = kwargs['from_parameter'] if kwargs and 'from_parameter' in kwargs else None
     if 'result_node' in kwargs:
-        params['data'] = '_' + kwargs['result_node']
-        if process_name != 'apply':
-            params['reducer'] = {}
-        _ = kwargs.pop('result_node', None)
+        if 'data' in params:
+            params['data'] = '_' + kwargs['result_node']
+            if process_name != 'apply':
+                params['reducer'] = {}
+            _ = kwargs.pop('result_node', None)
     for key in params:
         params[key] = convert_from_node_parameter(params[key], from_param)
 
@@ -104,41 +105,6 @@ def map_required(id, process, kwargs=None) -> str:
     return f"""{'_' + id} = oeop.{process_name}({params_str})
 """
 
-def map_data(id, process, kwargs):
-    """Map to xarray version of processes with input (data, param_1, ?param2, ...).
-
-    Creates a string like the following:
-    sum_node = oeop.sum([nir, p1, p2], extra_values=[1])
-
-    Returns: str
-
-    """
-
-    process_name = process['process_id']
-    params = process['arguments']
-    if 'result_node' in kwargs:
-        params['data'] = '_' + kwargs['result_node']
-        if process_name != 'apply':
-            params['reducer'] = {}
-    else:
-        params['data'] = convert_from_node_parameter(params['data'],
-                                                     kwargs['from_parameter'])
-    if 'target' in params: #target is used in resample_cube_spatial for example
-        params['target'] = convert_from_node_parameter(params['target'],
-                                                     kwargs['from_parameter'])
-    if 'dimension' in kwargs and not isinstance(params['data'], list):
-        kwargs['dimension'] = check_dimension(kwargs['dimension'])
-    elif 'dimension' in kwargs:
-        # Do not map 'dimension' for processes like `sum` and `apply`
-        _ = kwargs.pop('dimension', None)
-    _ = kwargs.pop('from_parameter', None)
-    _ = kwargs.pop('result_node', None)
-    params = {**params, **kwargs}
-
-    params_str = create_string(params)
-    return f"""{'_'+id} = oeop.{process_name}({params_str})
-"""
-
 
 def convert_from_node_parameter(args_in, from_par=None):
     """ Convert from_node and resolve from_parameter dependencies."""
@@ -153,10 +119,7 @@ def convert_from_node_parameter(args_in, from_par=None):
                 and isinstance(item, dict) \
                 and 'from_parameter' in item \
                 and item['from_parameter'] in from_par.keys():
-            if isinstance(from_par[item['from_parameter']], str):
-                args_in[k] = '_' + from_par[item['from_parameter']]
-            else:
-                args_in[k] = from_par[item['from_parameter']]
+            args_in[k] = '_' + from_par[item['from_parameter']]
 
     if len(args_in) == 1:
         args_in = args_in[0]

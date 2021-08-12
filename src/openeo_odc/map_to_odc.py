@@ -2,7 +2,7 @@
 
 """
 
-from openeo_odc.map_processes_odc import map_required, map_data, map_load_collection
+from openeo_odc.map_processes_odc import map_general, map_load_collection
 
 
 def map_to_odc(graph, odc_env, odc_url):
@@ -21,15 +21,12 @@ def map_to_odc(graph, odc_env, odc_url):
         if cur_node.parent_process: #parent process can be eiter reduce_dimension or apply
             if cur_node.parent_process.process_id == 'reduce_dimension':
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
-        if set(cur_node.arguments.keys()) in [{'x', 'y'}, {'x', }, {'data', 'value'}, {'base', 'p'}]:
-            nodes[cur_node.id] = map_required(cur_node.id, cur_node.content, kwargs)
-        elif 'data' in tuple(cur_node.arguments.keys()):
-            nodes[cur_node.id] = map_required(cur_node.id, cur_node.content, kwargs)
-        elif 'min' in tuple(cur_node.arguments.keys()):
-            nodes[cur_node.id] = map_required(cur_node.id, cur_node.content, kwargs)
-        elif 'id' in tuple(cur_node.arguments.keys()):
+        param_sets = [{'x', 'y'}, {'x', }, {'data', 'value'}, {'base', 'p'}, {'data', }]
+        if 'id' in tuple(cur_node.arguments.keys()):
             # This should be only load_collection
             nodes[cur_node.id] = map_load_collection(cur_node.id, cur_node.content)
+        elif (params in set(cur_node.arguments.keys()) for params in param_sets):
+            nodes[cur_node.id] = map_general(cur_node.id, cur_node.content, kwargs)
         else:
             raise ValueError(f"Node {cur_node.id} with arguments {cur_node.arguments.keys()} could not be mapped!")
 
@@ -54,18 +51,16 @@ def resolve_from_parameter(node):
             # Argument is not iterable (e.g. 1 or None)
             continue
         if 'from_parameter' in node.arguments[argument]:
-            if argument == 'data':
-                in_nodes['data'] = node.parent_process.arguments['data']['from_node']
+            if argument == 'data' or argument == 'x':
                 try:
-                    in_nodes['parameters'] = node.parent_process.arguments['parameters']
+                    in_nodes[node.arguments[argument]['from_parameter']] = node.arguments[argument]['from_parameter'] #node.parent_process.arguments['parameters']
                 except:
                     continue
-            elif argument == 'x':
                 in_nodes[argument] = node.parent_process.arguments['data']['from_node']
-            elif argument == 'x':
-                in_nodes[argument] = node.arguments['x']['from_parameter']
+            #elif argument == 'x':
+            #    in_nodes[argument] = node.arguments['x']['from_parameter']
             elif argument == 'y':
-                in_nodes['x'] = node.arguments['x']['from_node']
+                in_nodes[node.arguments[argument]['from_parameter']] = node.arguments[node.arguments[argument]['from_parameter']]['from_node']
 
     return in_nodes
 

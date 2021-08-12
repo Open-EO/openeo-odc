@@ -4,7 +4,7 @@ Tests processes with input type func(x, y)
 from typing import Tuple, Any, Dict
 
 import pytest
-from openeo_odc.map_processes_odc import map_required
+from openeo_odc.map_processes_odc import map_general
 
 from tests.utils import create_params, set_process
 
@@ -63,7 +63,7 @@ def test_xy(process: str, get_xy_param: Tuple[str, Dict[str, Any], str]):
     """Test conversions of processes with input x, y."""
     node_id, process_def, process_ref = set_process(*get_xy_param, process)
 
-    out = map_required(node_id, process_def)
+    out = map_general(node_id, process_def)
 
     assert out == process_ref
 
@@ -97,7 +97,7 @@ def test_x(process: str, get_x_param: Tuple[str, Dict[str, Any], str]):
     """Test conversions of processes with input x."""
     node_id, process_def, process_ref = set_process(*get_x_param, process)
 
-    out = map_required(node_id, process_def)
+    out = map_general(node_id, process_def)
 
     assert out == process_ref
 
@@ -109,7 +109,7 @@ def test_x(process: str, get_x_param: Tuple[str, Dict[str, Any], str]):
 def test_data_value(process: str, get_data_val_param: Tuple[str, Dict[str, Any], str]):
     node_id, process_def, process_ref = set_process(*get_data_val_param, process)
 
-    out = map_required(node_id, process_def)
+    out = map_general(node_id, process_def)
 
     assert out == process_ref
 
@@ -125,7 +125,7 @@ def test_power(arg_in: Dict[str, Any], arg_out: str):
     """Test conversions of power process with input base, p."""
     node_id, process_def, process_ref = set_process(*create_params("node_power", arg_in, arg_out), "power")
 
-    out = map_required(node_id, process_def)
+    out = map_general(node_id, process_def)
 
     assert out == process_ref
 
@@ -145,7 +145,7 @@ def test_power(arg_in: Dict[str, Any], arg_out: str):
     ]
 )
 def get_fit_param(request):
-    return create_params("node_xy", request.param[0], request.param[1])
+    return create_params("node_curve", request.param[0], request.param[1])
 
 @pytest.mark.parametrize("process", (
         "fit_curve",
@@ -155,6 +155,6 @@ def test_curve(process: str, get_fit_param: Tuple[str, Dict[str, Any], str]):
     """Test conversions of processes with input x, y."""
     node_id, process_def, process_ref = set_process(*get_fit_param, process)
 
-    out = map_required(node_id, process_def)
+    out = map_general(node_id, process_def)
 
     assert out == process_ref
