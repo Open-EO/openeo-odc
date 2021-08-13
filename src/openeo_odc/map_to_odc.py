@@ -22,7 +22,7 @@ def map_to_odc(graph, odc_env, odc_url):
             if cur_node.parent_process.process_id == 'reduce_dimension':
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
         param_sets = [{'x', 'y'}, {'x', }, {'data', 'value'}, {'base', 'p'}, {'data', }]
-        if 'id' in tuple(cur_node.arguments.keys()):
+        if cur_node.process_id == 'load_collection':
             # This should be only load_collection
             nodes[cur_node.id] = map_load_collection(cur_node.id, cur_node.content)
         elif (params in set(cur_node.arguments.keys()) for params in param_sets):
@@ -52,11 +52,11 @@ def resolve_from_parameter(node):
             continue
         if 'from_parameter' in node.arguments[argument]:
             if argument == 'data' or argument == 'x':
+                in_nodes[argument] = node.parent_process.arguments['data']['from_node']
                 try:
-                    in_nodes[node.arguments[argument]['from_parameter']] = node.arguments[argument]['from_parameter'] #node.parent_process.arguments['parameters']
+                    in_nodes['parameters'] = node.parent_process.arguments['parameters']
                 except:
                     continue
-                in_nodes[argument] = node.parent_process.arguments['data']['from_node']
             #elif argument == 'x':
             #    in_nodes[argument] = node.arguments['x']['from_parameter']
             elif argument == 'y':

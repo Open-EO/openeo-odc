@@ -83,12 +83,11 @@ def map_general(id, process, kwargs=None) -> str:
     process_name = process['process_id']
     params = deepcopy(process['arguments'])
     from_param = kwargs['from_parameter'] if kwargs and 'from_parameter' in kwargs else None
-    if 'result_node' in kwargs:
-        if 'data' in params:
-            params['data'] = '_' + kwargs['result_node']
-            if process_name != 'apply':
-                params['reducer'] = {}
-            _ = kwargs.pop('result_node', None)
+    if 'result_node' in kwargs: #if result_node is in kwargs, data must always be in params
+        params['data'] = '_' + kwargs['result_node']
+        if process_name != 'apply':
+            params['reducer'] = {}
+        _ = kwargs.pop('result_node', None)
     for key in params:
         params[key] = convert_from_node_parameter(params[key], from_param)
 
@@ -119,7 +118,10 @@ def convert_from_node_parameter(args_in, from_par=None):
                 and isinstance(item, dict) \
                 and 'from_parameter' in item \
                 and item['from_parameter'] in from_par.keys():
-            args_in[k] = '_' + from_par[item['from_parameter']]
+            if isinstance(from_par[item['from_parameter']], str):
+                args_in[k] = '_' + from_par[item['from_parameter']]
+            else:
+                args_in[k] = from_par[item['from_parameter']]
 
     if len(args_in) == 1:
         args_in = args_in[0]
