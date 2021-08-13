@@ -85,7 +85,7 @@ def map_general(id, process, kwargs=None) -> str:
     from_param = kwargs['from_parameter'] if kwargs and 'from_parameter' in kwargs else None
     if 'result_node' in kwargs: #if result_node is in kwargs, data must always be in params
         params['data'] = '_' + kwargs['result_node']
-        if process_name != 'apply':
+        if process_name != 'apply' and process_name != 'fit_curve':
             params['reducer'] = {}
         _ = kwargs.pop('result_node', None)
     for key in params:

@@ -57,8 +57,6 @@ def resolve_from_parameter(node):
                     in_nodes['parameters'] = node.parent_process.arguments['parameters']
                 except:
                     continue
-            #elif argument == 'x':
-            #    in_nodes[argument] = node.arguments['x']['from_parameter']
             elif argument == 'y':
                 in_nodes[node.arguments[argument]['from_parameter']] = node.arguments[node.arguments[argument]['from_parameter']]['from_node']
 
