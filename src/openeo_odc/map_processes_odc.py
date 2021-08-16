@@ -5,6 +5,8 @@ from datetime import datetime
 import numpy as np
 from copy import deepcopy
 
+from openeo_odc.utils import get_oeop_str
+
 
 def map_load_collection(id, process):
     """ Map to load_collection process for ODC datacubes.
@@ -101,8 +103,7 @@ def map_general(id, process, kwargs=None) -> str:
         params = {**params, **kwargs}
 
     params_str = create_string(params)
-    return f"""{'_' + id} = oeop.{process_name}({params_str})
-"""
+    return get_oeop_str(id, process_name, params_str)
 
 
 def convert_from_node_parameter(args_in, from_par=None):

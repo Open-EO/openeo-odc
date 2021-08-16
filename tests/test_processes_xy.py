@@ -55,8 +55,8 @@ def get_data_val_param(request):
         "multiply",
         "normalized_difference",
         "arctan2",
-        "and",
-        "or",
+        "and_",
+        "or_",
         "xor",
 ))
 def test_xy(process: str, get_xy_param: Tuple[str, Dict[str, Any], str]):
