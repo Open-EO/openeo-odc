@@ -51,14 +51,7 @@ def resolve_from_parameter(node):
             # Argument is not iterable (e.g. 1 or None)
             continue
         if 'from_parameter' in node.arguments[argument]:
-            if argument == 'data' or argument == 'x':
-                in_nodes[argument] = node.parent_process.arguments['data']['from_node']
-                try:
-                    in_nodes['parameters'] = node.parent_process.arguments['parameters']
-                except:
-                    continue
-            elif argument == 'y':
-                in_nodes[node.arguments[argument]['from_parameter']] = node.arguments[node.arguments[argument]['from_parameter']]['from_node']
+            in_nodes[argument] = node.parent_process.arguments['data']['from_node']
 
     return in_nodes
 

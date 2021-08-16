@@ -122,6 +122,8 @@ def convert_from_node_parameter(args_in, from_par=None):
                 args_in[k] = '_' + from_par[item['from_parameter']]
             else:
                 args_in[k] = from_par[item['from_parameter']]
+        elif isinstance(item, dict) and 'from_parameter' in item:
+            args_in[k] = item["from_parameter"]
 
     if len(args_in) == 1:
         args_in = args_in[0]
