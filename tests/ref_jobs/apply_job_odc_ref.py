@@ -11,5 +11,5 @@ _loadcollection1_0 = oeop.load_collection(odc_cube=cube, **{'product': 'S2_L2A_T
 _min1_2 = oeop.min(**{'data': _loadcollection1_0, 'dimension': 'time'})
 _reducedimension2_1 = oeop.reduce_dimension(**{'data': _min1_2, 'dimension': 't', 'reducer': {}})
 _sqrt1_4 = oeop.sqrt(**{'x': _reducedimension2_1})
-_apply1_3 = oeop.apply(**{'data': _sqrt1_4, 'process': {'from_node': 'sqrt1_4'}, 'context': ''})
+_apply1_3 = oeop.apply(**{'data': _sqrt1_4, 'process': _sqrt1_4, 'context': ''})
 _saveresult1_5 = oeop.save_result(**{'data': _apply1_3, 'format': 'GTiff', 'options': {}})

@@ -2534,6 +2534,347 @@
       "summary": "Compute the sum by adding up numbers"
     },
     {
+          "categories": [
+        "cubes",
+        "math"
+      ],
+      "deprecated": false,
+      "description": "Use non-linear least squares to fit a model function y = f(x, parameters) to data.\n\nThe process throws an InvalidValues exception if invalid values are encountered. Invalid values are finite numbers (see also is_valid).",
+      "exceptions": {
+        "FormatUnsuitable": {
+          "http": 400,
+          "message": "At least one of the values is not a finite number."
+        }
+      },
+      "experimental": true,
+      "id": "fit_curve",
+      "links": [
+        {
+          "href": "https://processes.openeo.org/draft/#fit_curve",
+          "rel": "about",
+          "title": "Fit Curve Process"
+        },
+        {
+          "href": "https://processes.openeo.org/draft/#predict_curve",
+          "rel": "about",
+          "title": "Predict Curve Process"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "data",
+          "deprecated": false,
+          "description": "A data cube to predict values for.",
+          "experimental": false,
+          "optional": false,
+          "schema": [
+            {
+              "minItems": 0,
+              "subtype": "raster-cube",
+              "type": "object"
+            },
+            {
+              "minItems": 0,
+              "subtype": "vector-cube",
+              "type": "object"
+            }
+          ]
+        },
+        {
+          "name": "function",
+          "deprecated": false,
+          "description": "The model function. It must take the parameters to fit as array through the first argument and the independent variable x as the second argument.",
+          "experimental": false,
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "parameters": [
+              {
+                "deprecated": false,
+                "description": "The value for the independent variable x.",
+                "experimental": false,
+                "name": "x",
+                "optional": false,
+                "schema": {
+                  "description": "number",
+                  "minItems": 0
+                }
+              },
+              {
+                "deprecated": false,
+                "description": "The parameters for the model function, contains at least one parameter.",
+                "experimental": false,
+                "name": "parameters",
+                "optional": false,
+                "schema": {
+                  "description": "array",
+                  "minItems": 0
+                }
+              }
+            ],
+            "process_graph": {},
+            "subtype": "process-graph",
+            "type": "object"
+          }
+        },
+        {
+          "name": "parameters",
+          "deprecated": false,
+          "description": "Defined the number of parameters for the model function and provides an initial guess for them. At least one parameter is required.",
+          "experimental": false,
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "numbers",
+            "type": "numbers"
+          }
+        },
+        {
+          "name": "dimension",
+          "deprecated": false,
+          "description": "The name of the dimension for curve fitting. Must be a dimension with labels that have a order (i.e. numerical labels or a temporal dimension). ",
+          "experimental": false,
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "subtype": "string",
+            "type": "string"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "A data cube with the optimal values for the parameters.",
+        "schema": {
+          "minItems": 0,
+          "type": "object"
+        }
+      },
+      "summary": "Curve fitting"
+    },
+    {
+      "categories": [
+        "math"
+      ],
+      "deprecated": false,
+      "description": "The real number Pi (π) is a mathematical constant that is the ratio of the circumference of a circle to its diameter. The numerical value is approximately 3.14159.",
+      "exceptions": {},
+      "experimental": false,
+      "id": "pi",
+      "links": [
+        {
+          "href": "https://processes.openeo.org/#pi",
+          "rel": "about",
+          "title": "Pi"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "x",
+          "optional": true
+        }],
+      "process_graph": {},
+      "returns": {
+        "description": "Pi",
+        "schema": {
+          "minItems": 0,
+          "type": "number"
+        }
+      },
+      "summary": "Pi"
+    },
+    {
+      "categories": [
+        "math"
+      ],
+      "deprecated": false,
+      "description": "Addition of two numbers",
+      "exceptions": {
+      },
+      "experimental": false,
+      "id": "add",
+      "links": [
+        {
+          "href": "https://processes.openeo.org/#add",
+          "rel": "about",
+          "title": "Add Process"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "The first summand.",
+          "experimental": false,
+          "name": "x",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": "number"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "The second summand.",
+          "experimental": false,
+          "name": "y",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": "number"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "The computed sum of the two numbers.",
+        "schema": {
+          "minItems": 0,
+          "type": "number"
+        }
+      },
+      "summary": "Add"
+    },
+    {
+      "categories": [
+        "math"
+      ],
+      "deprecated": false,
+      "description": "Computes the cosine of x.\n\nWorks on radians only. The no-data value null is passed through and therefore gets propagated.",
+      "exceptions": {
+      },
+      "experimental": false,
+      "id": "cos",
+      "links": [
+        {
+          "href": "https://processes.openeo.org/#cos",
+          "rel": "about",
+          "title": "Cos Process"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "An angle in radians.",
+          "experimental": false,
+          "name": "x",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": "number"
+          }
+        }],
+      "process_graph": {},
+      "returns": {
+        "description": "The computed cosine of x.",
+        "schema": {
+          "minItems": 0,
+          "type": "number"
+        }
+      },
+      "summary": "Cosine"
+    },
+    {
+      "categories": [
+        "math"
+      ],
+      "deprecated": false,
+      "description": "Computes the sine of x.\n\nWorks on radians only. The no-data value null is passed through and therefore gets propagated.",
+      "exceptions": {
+      },
+      "experimental": false,
+      "id": "sin",
+      "links": [
+        {
+          "href": "https://processes.openeo.org/#sin",
+          "rel": "about",
+          "title": "Sin Process"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "An angle in radians.",
+          "experimental": false,
+          "name": "x",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": "number"
+          }
+        }],
+      "process_graph": {},
+      "returns": {
+        "description": "The computed sine of x.",
+        "schema": {
+          "minItems": 0,
+          "type": "number"
+        }
+      },
+      "summary": "Sine"
+    },
+    {
+      "categories": [
+        "math"
+      ],
+      "deprecated": false,
+      "description": "Clips a number between specified minimum and maximum values. A value larger than the maximum value is set to the maximum value, a value lower than the minimum value is set to the minimum value.\n\nThe no-data value null is passed through and therefore gets propagated.",
+      "exceptions": {
+      },
+      "experimental": false,
+      "id": "clip",
+      "links": [
+        {
+          "href": "https://processes.openeo.org/#clip",
+          "rel": "about",
+          "title": "Clip Process"
+        }
+      ],
+      "parameters": [
+        {
+          "deprecated": false,
+          "description": "A number.",
+          "experimental": false,
+          "name": "x",
+          "optional": false,
+          "schema": {
+              "minItems": 0,
+              "type": "number"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "Minimum value. If the value is lower than this value, the process will return the value of this parameter.",
+          "experimental": false,
+          "name": "min",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": "number"
+          }
+        },
+        {
+          "deprecated": false,
+          "description": "Maximum value. If the value is greater than this value, the process will return the value of this parameter.",
+          "experimental": false,
+          "name": "max",
+          "optional": false,
+          "schema": {
+            "minItems": 0,
+            "type": "number"
+          }
+        }
+      ],
+      "process_graph": {},
+      "returns": {
+        "description": "Clip a value between a minimum and a maximum.",
+        "schema": {
+          "minItems": 0,
+          "type": "number"
+        }
+      },
+      "summary": "Clip"
+    },
+    {
     "id": "sqrt",
     "summary": "Square root",
     "description": "Computes the square root of a real number `x`, which is equal to calculating `x` to the power of *0.5*.\n\nA square root of x is a number a such that *`a² = x`*. Therefore, the square root is the inverse function of a to the power of 2, but only for *a >= 0*.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
