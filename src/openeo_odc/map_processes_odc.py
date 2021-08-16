@@ -133,13 +133,10 @@ def check_dimension(in_value):
     """ Convert common dimension names to a preset value."""
 
     if in_value in ('t', 'time', 'temporal'):
-        out_value = 'time'
+        return 'time'
     elif in_value in ('s', 'band', 'bands', 'spectral'):
-        out_value = 'bands'
-    else:
-        out_value = in_value
-
-    return out_value
+        return 'bands'
+    return in_value
 
 
 def create_string(dict_input):
