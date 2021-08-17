@@ -9,7 +9,7 @@ cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
 client = Client('tcp://xx.yyy.zz.kk:8786')
 
 
-def fit_curve_func_18_0(x, *parameters):
+def extra_func_18_0(x, *parameters):
     _32frj455b_1 = oeop.pi(**{})
     _2sjyaa699_11 = oeop.pi(**{})
     _lyjcuq5vd_15 = oeop.multiply(**{'x': 2, 'y': _32frj455b_1})
@@ -33,5 +33,5 @@ def fit_curve_func_18_0(x, *parameters):
 _23_20 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}, 'x': (11.5381, 11.5381), 'y': (46.4868, 46.4868), 'time': ['2016-01-01T00:00:00Z', '2016-05-31T00:00:00Z'], 'measurements': []})
 _1_19 = oeop.clip(**{'x': _23_20, 'min': 0, 'max': 4000})
 _22_18 = oeop.apply(**{'process': _1_19, 'data': _1_19, 'context': ''})
-_18_0 = oeop.fit_curve(**{'data': _22_18, 'function': fit_curve_func_18_0, 'parameters': [1, 1, 1], 'dimension': 't'})
+_18_0 = oeop.fit_curve(**{'data': _22_18, 'function': extra_func_18_0, 'parameters': [1, 1, 1], 'dimension': 't'})
 _saveresult1_21 = oeop.save_result(**{'data': _18_0, 'format': 'NETCDF'})

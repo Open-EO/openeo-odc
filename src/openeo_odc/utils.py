@@ -1,13 +1,13 @@
-class FitCurveUtils:
+class ExtraFuncUtils:
 
-    def get_func_name(self, fc_node_id: str) -> str:
-        return f"fit_curve_func_{fc_node_id}"
+    def get_func_name(self, node_id: str) -> str:
+        return f"extra_func_{node_id}"
 
-    def get_dict_key(self, fc_node_id: str) -> str:
-        return f"fit_curve_{fc_node_id}"
+    def get_dict_key(self, node_id: str) -> str:
+        return f"extra_{node_id}"
 
-    def get_func_header(self, fc_node_id) -> str:
-        return f"\n\ndef {self.get_func_name(fc_node_id)}(x, *parameters):\n"
+    def get_func_header(self, node_id) -> str:
+        return f"\n\ndef {self.get_func_name(node_id)}(x, *parameters):\n"
 
 
 SUFFIXED_PROCESSES = [

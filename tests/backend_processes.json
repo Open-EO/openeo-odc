@@ -6,96 +6,96 @@
       "summary": "CARD4L compliant SAR NRB generation",
       "description": "Computes CARD4L compliant backscatter (gamma0) from SAR input.\n\nNote that backscatter computation may require instrument specific metadata that is tightly coupled to the original SAR products. As a result, this process may only work in combination with loading data from specific collections, not with general data cubes.",
       "categories": [
-          "cubes",
-          "sar",
-          "ard"
+        "cubes",
+        "sar",
+        "ard"
       ],
       "experimental": true,
       "parameters": [
-          {
-              "name": "data",
-              "description": "The source data cube containing SAR input.",
-              "schema": {
-                  "subtype": "raster-cube",
-                  "type": "object"
-              }
-          },
-          {
-              "name": "elevation_model",
-              "description": "The digital elevation model to use. Set to `null` (the default) to allow the back-end to choose, which will improve portability, but reduce reproducibility.",
-              "optional": true,
-              "default": null,
-              "schema": [
-                  {
-                      "type": "string",
-                      "subtype": "collection-id"
-                  },
-                  {
-                      "type": "cop-dem-30m"
-                  }
-              ]
-          },
-          {
-              "name": "ellipsoid_incidence_angle",
-              "description": "If set to `true`, an ellipsoidal incidence angle band named `ellipsoid_incidence_angle` is added. The values are given in degrees.",
-              "optional": true,
-              "default": false,
-              "schema": {
-                  "type": "boolean"
-              }
-          },
-          {
-              "name": "noise_removal",
-              "description": "If set to `false`, no noise removal is applied. Defaults to `true`, which removes noise.",
-              "optional": true,
-              "default": true,
-              "schema": {
-                  "type": "boolean"
-              }
+        {
+          "name": "data",
+          "description": "The source data cube containing SAR input.",
+          "schema": {
+            "subtype": "raster-cube",
+            "type": "object"
           }
+        },
+        {
+          "name": "elevation_model",
+          "description": "The digital elevation model to use. Set to `null` (the default) to allow the back-end to choose, which will improve portability, but reduce reproducibility.",
+          "optional": true,
+          "default": null,
+          "schema": [
+            {
+              "type": "string",
+              "subtype": "collection-id"
+            },
+            {
+              "type": "cop-dem-30m"
+            }
+          ]
+        },
+        {
+          "name": "ellipsoid_incidence_angle",
+          "description": "If set to `true`, an ellipsoidal incidence angle band named `ellipsoid_incidence_angle` is added. The values are given in degrees.",
+          "optional": true,
+          "default": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "noise_removal",
+          "description": "If set to `false`, no noise removal is applied. Defaults to `true`, which removes noise.",
+          "optional": true,
+          "default": true,
+          "schema": {
+            "type": "boolean"
+          }
+        }
       ],
       "returns": {
-          "description": "Backscatter values expressed as gamma0. The data returned is CARD4L compliant and contains metadata.\n\nBy default, the backscatter values are given in linear scale.",
-          "schema": {
-              "subtype": "raster-cube",
-              "type": "object"
-          }
+        "description": "Backscatter values expressed as gamma0. The data returned is CARD4L compliant and contains metadata.\n\nBy default, the backscatter values are given in linear scale.",
+        "schema": {
+          "subtype": "raster-cube",
+          "type": "object"
+        }
       },
       "exceptions": {
-          "DigitalElevationModelInvalid": {
-              "message": "The digital elevation model specified is either not a DEM or can't be used with the data cube given."
-          }
+        "DigitalElevationModelInvalid": {
+          "message": "The digital elevation model specified is either not a DEM or can't be used with the data cube given."
+        }
       },
       "links": [
-          {
-              "rel": "about",
-              "href": "http://ceos.org/ard/files/PFS/NRB/v5.0/CARD4L-PFS_Normalised_Radar_Backscatter-v5.0.pdf",
-              "title": "CEOS CARD4L specification"
-          }
+        {
+          "rel": "about",
+          "href": "http://ceos.org/ard/files/PFS/NRB/v5.0/CARD4L-PFS_Normalised_Radar_Backscatter-v5.0.pdf",
+          "title": "CEOS CARD4L specification"
+        }
       ],
       "process_graph": {
-          "nrb": {
-              "process_id": "sar_backscatter",
-              "arguments": {
-                  "data": {
-                      "from_parameter": "data"
-                  },
-                  "coefficient": "gamma0-terrain",
-                  "elevation_model": {
-                      "from_parameter": "elevation_model"
-                  },
-                  "mask": true,
-                  "contributing_area": true,
-                  "local_incidence_angle": true,
-                  "ellipsoid_incidence_angle": {
-                      "from_parameter": "ellipsoid_incidence_angle"
-                  },
-                  "noise_removal": {
-                      "from_parameter": "noise_removal"
-                  }
-              },
-              "result": true
-          }
+        "nrb": {
+          "process_id": "sar_backscatter",
+          "arguments": {
+            "data": {
+              "from_parameter": "data"
+            },
+            "coefficient": "gamma0-terrain",
+            "elevation_model": {
+              "from_parameter": "elevation_model"
+            },
+            "mask": true,
+            "contributing_area": true,
+            "local_incidence_angle": true,
+            "ellipsoid_incidence_angle": {
+              "from_parameter": "ellipsoid_incidence_angle"
+            },
+            "noise_removal": {
+              "from_parameter": "noise_removal"
+            }
+          },
+          "result": true
+        }
       }
     },
     {
@@ -103,74 +103,74 @@
       "summary": "CARD4L compliant Surface Reflectance generation",
       "description": "Computes CARD4L compliant surface reflectance values from optical input.",
       "categories": [
-          "cubes",
-          "sar",
-          "ard"
+        "cubes",
+        "sar",
+        "ard"
       ],
       "experimental": true,
       "parameters": [
-          {
-              "description": "The source data cube containing multi-spectral optical top of the atmosphere (TOA) reflectances. There must be a single dimension of type bands available.",
-              "name": "data",
-              "schema": {
-                  "subtype": "raster-cube",
-                  "type": "object"
-              }
-          },
-          {
-              "description": "The atmospheric correction method to use.",
-              "name": "atmospheric_correction_method",
-              "schema": {
-                  "type": [
-                      "string"
-                  ],
-                  "enum": [
-                      "FORCE",
-                      "iCOR"
-                  ]
-              }
-          },
-          {
-              "description": "The cloud detection method to use.",
-              "name": "cloud_detection_method",
-              "schema": {
-                  "type": [
-                      "string"
-                  ],
-                  "enum": [
-                      "Fmask"
-                  ]
-              }
-          },
-          {
-              "description": "The digital elevation model to use, leave empty to allow the back-end to make a suitable choice.",
-              "name": "elevation_model",
-              "optional": true,
-              "default": null,
-              "schema": [
-                  {
-                      "type": "string",
-                      "subtype": "collection-id"
-                  },
-                  {
-                      "type": "cop-dem-30m"
-                  }
-              ]
+        {
+          "description": "The source data cube containing multi-spectral optical top of the atmosphere (TOA) reflectances. There must be a single dimension of type bands available.",
+          "name": "data",
+          "schema": {
+            "subtype": "raster-cube",
+            "type": "object"
           }
+        },
+        {
+          "description": "The atmospheric correction method to use.",
+          "name": "atmospheric_correction_method",
+          "schema": {
+            "type": [
+              "string"
+            ],
+            "enum": [
+              "FORCE",
+              "iCOR"
+            ]
+          }
+        },
+        {
+          "description": "The cloud detection method to use.",
+          "name": "cloud_detection_method",
+          "schema": {
+            "type": [
+              "string"
+            ],
+            "enum": [
+              "Fmask"
+            ]
+          }
+        },
+        {
+          "description": "The digital elevation model to use, leave empty to allow the back-end to make a suitable choice.",
+          "name": "elevation_model",
+          "optional": true,
+          "default": null,
+          "schema": [
+            {
+              "type": "string",
+              "subtype": "collection-id"
+            },
+            {
+              "type": "cop-dem-30m"
+            }
+          ]
+        }
       ],
       "returns": {
-          "description": "Data cube containing bottom of atmosphere reflectances with atmospheric disturbances like clouds and cloud shadows removed. The data returned is CARD4L compliant and contains metadata.",
-          "schema": {
-              "subtype": "raster-cube",
-              "type": "object"
-          }
+        "description": "Data cube containing bottom of atmosphere reflectances with atmospheric disturbances like clouds and cloud shadows removed. The data returned is CARD4L compliant and contains metadata.",
+        "schema": {
+          "subtype": "raster-cube",
+          "type": "object"
+        }
       },
       "links": [
-          {
-              "rel": "about",
-              "href": "http://ceos.org/ard/files/PFS/SR/v5.0/CARD4L_Product_Family_Specification_Surface_Reflectance-v5.0.pdf",
-              "title": "CEOS CARD4L specification"
-          }
+        {
+          "rel": "about",
+          "href": "http://ceos.org/ard/files/PFS/SR/v5.0/CARD4L_Product_Family_Specification_Surface_Reflectance-v5.0.pdf",
+          "title": "CEOS CARD4L specification"
+        }
       ]
     },
     {
@@ -178,70 +178,70 @@
       "summary": "Apply atmospheric correction",
       "description": "Applies an atmospheric correction that converts top of atmosphere reflectance values into bottom of atmosphere/top of canopy reflectance values.",
       "categories": [
-          "cubes",
-          "optical"
+        "cubes",
+        "optical"
       ],
       "experimental": true,
       "parameters": [
-          {
-              "description": "Data cube containing multi-spectral optical top of atmosphere reflectances to be corrected.",
-              "name": "data",
-              "schema": {
-                  "subtype": "raster-cube",
-                  "type": "object"
-              }
-          },
-          {
-              "description": "The atmospheric correction method to use. To get reproducible results, you have to set a specific method.\n\nSet to `null` to allow the back-end to choose, which will improve portability, but reduce reproducibility as you *may* get different results if you run the processes multiple times.",
-              "name": "method",
-              "schema": [
-                  {
-                      "type": [
-                          "string"
-                      ],
-                      "enum": [
-                          "FORCE"
-                      ]
-                  },
-                  {
-                      "type": "null"
-                  }
-              ]
-          },
-          {
-              "description": "The digital elevation model to use, leave empty to allow the back-end to make a suitable choice.",
-              "name": "elevation_model",
-              "optional": true,
-              "default": null,
-              "schema": [
-                  {
-                      "type": "string",
-                      "subtype": "collection-id"
-                  },
-                  {
-                      "type": "cop-dem-30m"
-                  }
-              ]
+        {
+          "description": "Data cube containing multi-spectral optical top of atmosphere reflectances to be corrected.",
+          "name": "data",
+          "schema": {
+            "subtype": "raster-cube",
+            "type": "object"
           }
+        },
+        {
+          "description": "The atmospheric correction method to use. To get reproducible results, you have to set a specific method.\n\nSet to `null` to allow the back-end to choose, which will improve portability, but reduce reproducibility as you *may* get different results if you run the processes multiple times.",
+          "name": "method",
+          "schema": [
+            {
+              "type": [
+                "string"
+              ],
+              "enum": [
+                "FORCE"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "description": "The digital elevation model to use, leave empty to allow the back-end to make a suitable choice.",
+          "name": "elevation_model",
+          "optional": true,
+          "default": null,
+          "schema": [
+            {
+              "type": "string",
+              "subtype": "collection-id"
+            },
+            {
+              "type": "cop-dem-30m"
+            }
+          ]
+        }
       ],
       "returns": {
-          "description": "Data cube containing bottom of atmosphere reflectances.",
-          "schema": {
-              "subtype": "raster-cube",
-              "type": "object"
-          }
+        "description": "Data cube containing bottom of atmosphere reflectances.",
+        "schema": {
+          "subtype": "raster-cube",
+          "type": "object"
+        }
       },
       "exceptions": {
-          "DigitalElevationModelInvalid": {
-              "message": "The digital elevation model specified is either not a DEM or can't be used with the data cube given."
-          }
+        "DigitalElevationModelInvalid": {
+          "message": "The digital elevation model specified is either not a DEM or can't be used with the data cube given."
+        }
       },
       "links": [
-          {
-              "rel": "about",
-              "href": "https://bok.eo4geo.eu/IP1-7-1",
-              "title": "Atmospheric correction explained by EO4GEO body of knowledge."
-          }
+        {
+          "rel": "about",
+          "href": "https://bok.eo4geo.eu/IP1-7-1",
+          "title": "Atmospheric correction explained by EO4GEO body of knowledge."
+        }
       ]
     },
     {
@@ -249,130 +249,130 @@
       "summary": "Computes backscatter from SAR input",
       "description": "Computes backscatter from SAR input.\n\nNote that backscatter computation may require instrument specific metadata that is tightly coupled to the original SAR products. As a result, this process may only work in combination with loading data from specific collections, not with general data cubes.",
       "categories": [
-          "cubes",
-          "sar"
+        "cubes",
+        "sar"
       ],
       "experimental": true,
       "parameters": [
-          {
-              "name": "data",
-              "description": "The source data cube containing SAR input.",
-              "schema": {
-                  "subtype": "raster-cube",
-                  "type": "object"
-              }
-          },
-          {
-              "name": "coefficient",
-              "description": "Select the radiometric correction coefficient. The following options are available:\n\n* `beta0`: radar brightness\n* `sigma0-ellipsoid`: ground area computed with ellipsoid earth model\n* `sigma0-terrain`: ground area computed with terrain earth model\n* `gamma0-ellipsoid`: ground area computed with ellipsoid earth model in sensor line of sight\n* `gamma0-terrain`: ground area computed with terrain earth model in sensor line of sight (default)\n* `null`: non-normalized backscatter",
-              "optional": true,
-              "default": "gamma0-terrain",
-              "schema": [
-                  {
-                      "type": "string",
-                      "enum": [
-                          "beta0",
-                          "sigma0-ellipsoid",
-                          "sigma0-terrain",
-                          "gamma0-ellipsoid",
-                          "gamma0-terrain"
-                      ]
-                  },
-                  {
-                      "title": "Non-normalized backscatter",
-                      "type": "null"
-                  }
-              ]
-          },
-          {
-              "name": "elevation_model",
-              "description": "The digital elevation model to use. Set to `null` (the default) to allow the back-end to choose, which will improve portability, but reduce reproducibility.",
-              "optional": true,
-              "default": null,
-              "schema": [
-                  {
-                      "type": "string",
-                      "subtype": "collection-id"
-                  },
-                  {
-                      "type": "cop-dem-30m"
-                  }
-              ]
-          },
-          {
-              "name": "mask",
-              "description": "If set to `true`, a data mask is added to the bands with the name `mask`. It indicates which values are valid (1), invalid (0) or contain no-data (null).",
-              "optional": true,
-              "default": false,
-              "schema": {
-                  "type": "boolean"
-              }
-          },
-          {
-              "name": "contributing_area",
-              "description": "If set to `true`, a DEM-based local contributing area band named `contributing_area` is added. The values are given in square meters.",
-              "optional": true,
-              "default": false,
-              "schema": {
-                  "type": "boolean"
-              }
-          },
-          {
-              "name": "local_incidence_angle",
-              "description": "If set to `true`, a DEM-based local incidence angle band named `local_incidence_angle` is added. The values are given in degrees.",
-              "optional": true,
-              "default": false,
-              "schema": {
-                  "type": "boolean"
-              }
-          },
-          {
-              "name": "ellipsoid_incidence_angle",
-              "description": "If set to `true`, an ellipsoidal incidence angle band named `ellipsoid_incidence_angle` is added. The values are given in degrees.",
-              "optional": true,
-              "default": false,
-              "schema": {
-                  "type": "boolean"
-              }
-          },
-          {
-              "name": "noise_removal",
-              "description": "If set to `false`, no noise removal is applied. Defaults to `true`, which removes noise.",
-              "optional": true,
-              "default": true,
-              "schema": {
-                  "type": "boolean"
-              }
+        {
+          "name": "data",
+          "description": "The source data cube containing SAR input.",
+          "schema": {
+            "subtype": "raster-cube",
+            "type": "object"
           }
+        },
+        {
+          "name": "coefficient",
+          "description": "Select the radiometric correction coefficient. The following options are available:\n\n* `beta0`: radar brightness\n* `sigma0-ellipsoid`: ground area computed with ellipsoid earth model\n* `sigma0-terrain`: ground area computed with terrain earth model\n* `gamma0-ellipsoid`: ground area computed with ellipsoid earth model in sensor line of sight\n* `gamma0-terrain`: ground area computed with terrain earth model in sensor line of sight (default)\n* `null`: non-normalized backscatter",
+          "optional": true,
+          "default": "gamma0-terrain",
+          "schema": [
+            {
+              "type": "string",
+              "enum": [
+                "beta0",
+                "sigma0-ellipsoid",
+                "sigma0-terrain",
+                "gamma0-ellipsoid",
+                "gamma0-terrain"
+              ]
+            },
+            {
+              "title": "Non-normalized backscatter",
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "name": "elevation_model",
+          "description": "The digital elevation model to use. Set to `null` (the default) to allow the back-end to choose, which will improve portability, but reduce reproducibility.",
+          "optional": true,
+          "default": null,
+          "schema": [
+            {
+              "type": "string",
+              "subtype": "collection-id"
+            },
+            {
+              "type": "cop-dem-30m"
+            }
+          ]
+        },
+        {
+          "name": "mask",
+          "description": "If set to `true`, a data mask is added to the bands with the name `mask`. It indicates which values are valid (1), invalid (0) or contain no-data (null).",
+          "optional": true,
+          "default": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "contributing_area",
+          "description": "If set to `true`, a DEM-based local contributing area band named `contributing_area` is added. The values are given in square meters.",
+          "optional": true,
+          "default": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "local_incidence_angle",
+          "description": "If set to `true`, a DEM-based local incidence angle band named `local_incidence_angle` is added. The values are given in degrees.",
+          "optional": true,
+          "default": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "ellipsoid_incidence_angle",
+          "description": "If set to `true`, an ellipsoidal incidence angle band named `ellipsoid_incidence_angle` is added. The values are given in degrees.",
+          "optional": true,
+          "default": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "noise_removal",
+          "description": "If set to `false`, no noise removal is applied. Defaults to `true`, which removes noise.",
+          "optional": true,
+          "default": true,
+          "schema": {
+            "type": "boolean"
+          }
+        }
       ],
       "returns": {
-          "description": "Backscatter values corresponding to the chosen parametrization.\n\nBy default, the backscatter values are given in linear scale.",
-          "schema": {
-              "subtype": "raster-cube",
-              "type": "object"
-          }
+        "description": "Backscatter values corresponding to the chosen parametrization.\n\nBy default, the backscatter values are given in linear scale.",
+        "schema": {
+          "subtype": "raster-cube",
+          "type": "object"
+        }
       },
       "exceptions": {
-          "DigitalElevationModelInvalid": {
-              "message": "The digital elevation model specified is either not a DEM or can't be used with the data cube given."
-          }
+        "DigitalElevationModelInvalid": {
+          "message": "The digital elevation model specified is either not a DEM or can't be used with the data cube given."
+        }
       },
       "links": [
-          {
-              "rel": "about",
-              "href": "https://bok.eo4geo.eu/PP2-2-4-3",
-              "title": "Gamma nought (0) explained by EO4GEO body of knowledge."
-          },
-          {
-              "rel": "about",
-              "href": "https://bok.eo4geo.eu/PP2-2-4-2",
-              "title": "Sigma nought (0) explained by EO4GEO body of knowledge."
-          },
-          {
-              "rel": "about",
-              "href": "https://www.geo.uzh.ch/microsite/rsl-documents/research/publications/peer-reviewed-articles/201108-TGRS-Small-tcGamma-3809999360/201108-TGRS-Small-tcGamma.pdf",
-              "title": "Flattening Gamma: Radiometric Terrain Correction for SAR Imagery"
-          }
+        {
+          "rel": "about",
+          "href": "https://bok.eo4geo.eu/PP2-2-4-3",
+          "title": "Gamma nought (0) explained by EO4GEO body of knowledge."
+        },
+        {
+          "rel": "about",
+          "href": "https://bok.eo4geo.eu/PP2-2-4-2",
+          "title": "Sigma nought (0) explained by EO4GEO body of knowledge."
+        },
+        {
+          "rel": "about",
+          "href": "https://www.geo.uzh.ch/microsite/rsl-documents/research/publications/peer-reviewed-articles/201108-TGRS-Small-tcGamma-3809999360/201108-TGRS-Small-tcGamma.pdf",
+          "title": "Flattening Gamma: Radiometric Terrain Correction for SAR Imagery"
+        }
       ]
     },
     {
@@ -2534,7 +2534,7 @@
       "summary": "Compute the sum by adding up numbers"
     },
     {
-          "categories": [
+      "categories": [
         "cubes",
         "math"
       ],
@@ -2837,8 +2837,8 @@
           "name": "x",
           "optional": false,
           "schema": {
-              "minItems": 0,
-              "type": "number"
+            "minItems": 0,
+            "type": "number"
           }
         },
         {
@@ -2875,79 +2875,221 @@
       "summary": "Clip"
     },
     {
-    "id": "sqrt",
-    "summary": "Square root",
-    "description": "Computes the square root of a real number `x`, which is equal to calculating `x` to the power of *0.5*.\n\nA square root of x is a number a such that *`a² = x`*. Therefore, the square root is the inverse function of a to the power of 2, but only for *a >= 0*.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
-    "categories": [
+      "id": "sqrt",
+      "summary": "Square root",
+      "description": "Computes the square root of a real number `x`, which is equal to calculating `x` to the power of *0.5*.\n\nA square root of x is a number a such that *`a² = x`*. Therefore, the square root is the inverse function of a to the power of 2, but only for *a >= 0*.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+      "categories": [
         "math",
         "math > exponential & logarithmic"
-    ],
-    "parameters": [
+      ],
+      "parameters": [
         {
-            "name": "x",
-            "description": "A number.",
-            "schema": {
-                "type": [
-                    "number",
-                    "null"
-                ]
-            }
+          "name": "x",
+          "description": "A number.",
+          "schema": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
         }
-    ],
-    "returns": {
+      ],
+      "returns": {
         "description": "The computed square root.",
         "schema": {
-            "type": [
-                "number",
-                "null"
-            ]
+          "type": [
+            "number",
+            "null"
+          ]
         }
-    },
-    "examples": [
+      },
+      "examples": [
         {
-            "arguments": {
-                "x": 0
-            },
-            "returns": 0
+          "arguments": {
+            "x": 0
+          },
+          "returns": 0
         },
         {
-            "arguments": {
-                "x": 1
-            },
-            "returns": 1
+          "arguments": {
+            "x": 1
+          },
+          "returns": 1
         },
         {
-            "arguments": {
-                "x": 9
-            },
-            "returns": 3
+          "arguments": {
+            "x": 9
+          },
+          "returns": 3
         },
         {
-            "arguments": {
-                "x": null
-            },
-            "returns": null
+          "arguments": {
+            "x": null
+          },
+          "returns": null
         }
-    ],
-    "links": [
+      ],
+      "links": [
         {
-            "rel": "about",
-            "href": "http://mathworld.wolfram.com/SquareRoot.html",
-            "title": "Square root explained by Wolfram MathWorld"
+          "rel": "about",
+          "href": "http://mathworld.wolfram.com/SquareRoot.html",
+          "title": "Square root explained by Wolfram MathWorld"
         }
-    ],
-    "process_graph": {
+      ],
+      "process_graph": {
         "power": {
-            "process_id": "power",
-            "arguments": {
-                "base": {
-                    "from_parameter": "x"
-                },
-                "p": 0.5
+          "process_id": "power",
+          "arguments": {
+            "base": {
+              "from_parameter": "x"
             },
-            "result": true
+            "p": 0.5
+          },
+          "result": true
         }
+      }
+    },
+    {
+      "id": "load_result",
+      "summary": "Load batch job results",
+      "description": "Loads batch job results by job id from the server-side user workspace. The job must have been stored by the authenticated user on the back-end currently connected to.",
+      "categories": [
+        "cubes",
+        "import"
+      ],
+      "experimental": true,
+      "parameters": [
+        {
+          "name": "id",
+          "description": "The id of a batch job with results.",
+          "schema": {
+            "type": "string",
+            "subtype": "job-id",
+            "pattern": "^[\\w\\-\\.~]+$"
+          }
+        }
+      ],
+      "returns": {
+        "description": "A data cube for further processing.",
+        "schema": {
+          "type": "object",
+          "subtype": "raster-cube"
+        }
+      }
+    },
+    {
+      "id": "predict_curve",
+      "summary": "Predict values",
+      "description": "Predict values using a model function and pre-computed parameters.",
+      "categories": [
+        "cubes",
+        "math"
+      ],
+      "experimental": true,
+      "parameters": [
+        {
+          "name": "data",
+          "description": "A data cube to predict values for.",
+          "schema": {
+            "type": "object",
+            "subtype": "raster-cube"
+          }
+        },
+        {
+          "name": "parameters",
+          "description": "A data cube with optimal values from a result of e.g. ``fit_curve()``.",
+          "schema": {
+            "type": "object",
+            "subtype": "raster-cube"
+          }
+        },
+        {
+          "name": "function",
+          "description": "The model function. It must take the parameters to fit as array through the first argument and the independent variable `x` as the second argument.\n\nIt is recommended to store the model function as a user-defined process on the back-end.",
+          "schema": {
+            "type": "object",
+            "subtype": "process-graph",
+            "parameters": [
+              {
+                "name": "x",
+                "description": "The value for the independent variable `x`.",
+                "schema": {
+                  "type": [
+                    "number"
+                  ]
+                }
+              },
+              {
+                "name": "parameters",
+                "description": "The parameters for the model function, contains at least one parameter.",
+                "schema": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            ],
+            "returns": {
+              "description": "The computed value `y` value for the given independent variable `x` and the parameters.",
+              "schema": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        {
+          "name": "dimension",
+          "description": "The name of the dimension for predictions. Fails with a `DimensionNotAvailable` exception if the specified dimension does not exist.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "labels",
+          "description": "The labels to predict values for. If no labels are given, predicts values only for no-data (`null`) values in the data cube.",
+          "optional": true,
+          "default": null,
+          "schema": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date",
+                    "subtype": "date"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "subtype": "date-time"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "returns": {
+        "description": "A data cube with the predicted values.",
+        "schema": {
+          "type": "object",
+          "subtype": "raster-cube"
+        }
+      },
+      "exceptions": {
+        "DimensionNotAvailable": {
+          "message": "A dimension with the specified name does not exist."
+        }
+      }
     }
-}
   ]
 }
