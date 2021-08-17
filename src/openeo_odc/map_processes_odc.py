@@ -71,6 +71,19 @@ def map_load_collection(id, process):
 {'_'+id} = oeop.load_collection(odc_cube=cube, **{params})
 """
 
+def map_load_result(id, process) -> str:
+    """Map load_result process.
+
+    This needs to be handled separately because the user_generated ODC environment / cube must be used.
+    """
+    params = {
+        'product': process['arguments']['id'],
+        'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000},
+        }
+    return f"""
+_{id} = oeop.load_result(odc_cube=cube_user_gen, **{params})
+"""
+
 
 def map_general(id, process, kwargs=None) -> str:
     """Map processes with required arguments only.

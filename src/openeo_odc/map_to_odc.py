@@ -2,7 +2,7 @@
 
 """
 
-from openeo_odc.map_processes_odc import map_general, map_load_collection
+from openeo_odc.map_processes_odc import map_general, map_load_collection, map_load_result
 from openeo_odc.utils import FitCurveUtils
 
 
@@ -29,6 +29,8 @@ def map_to_odc(graph, odc_env, odc_url):
         param_sets = [{'x', 'y'}, {'x', }, {'data', 'value'}, {'base', 'p'}, {'data', }]
         if cur_node.process_id == 'load_collection':
             cur_node_content = map_load_collection(cur_node.id, cur_node.content)
+        elif cur_node.process_id == 'load_result':
+            cur_node_content = map_load_result(cur_node.id, cur_node.content)
         elif (params in set(cur_node.arguments.keys()) for params in param_sets):
             cur_node_content = map_general(cur_node.id, cur_node.content, kwargs)
         else:
@@ -48,7 +50,7 @@ def map_to_odc(graph, odc_env, odc_url):
     for fc_proc in fit_curve.values():
         final_fc.update(**fc_proc)
     return {
-        'header': create_job_header(odc_env, odc_url),
+        'header': create_job_header(odc_env_collection=odc_env, dask_url=odc_url),
         **final_fc,
         **nodes,
     }
@@ -77,25 +79,15 @@ def resolve_from_parameter(node):
     return in_nodes
 
 
-def create_job_header(odc_env: str, dask_url: str):
+def create_job_header(dask_url: str, odc_env_collection: str = "default", odc_env_user_gen: str = "user_generated"):
     """Create job imports."""
-    if odc_env is None:
-        return f"""from dask.distributed import Client
+    return f"""from dask.distributed import Client
 import datacube
 import openeo_processes as oeop
 
 # Initialize ODC instance
-cube = datacube.Datacube()
-# Connect to Dask Scheduler
-client = Client('{dask_url}')
-"""
-    else:
-        return f"""from dask.distributed import Client
-import datacube
-import openeo_processes as oeop
-
-# Initialize ODC instance
-cube = datacube.Datacube(app='app_1', env='{odc_env}')
+cube = datacube.Datacube(app='collection', env='{odc_env_collection}')
+cube_user_gen = datacube.Datacube(app='user_gen', env='{odc_env_user_gen}')
 # Connect to Dask Scheduler
 client = Client('{dask_url}')
 """

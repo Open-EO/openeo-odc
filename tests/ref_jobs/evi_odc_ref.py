@@ -3,7 +3,8 @@ import datacube
 import openeo_processes as oeop
 
 # Initialize ODC instance
-cube = datacube.Datacube(app='app_1', env='default')
+cube = datacube.Datacube(app='collection', env='default')
+cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
 # Connect to Dask Scheduler
 client = Client('tcp://xx.yyy.zz.kk:8786')
 
