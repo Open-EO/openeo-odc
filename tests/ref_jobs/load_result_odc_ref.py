@@ -32,6 +32,6 @@ def extra_func_23_0(x, *parameters):
 
 _28_18 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}, 'x': (11.3679141998291, 11.535799026489256), 'y': (46.29756750209694, 46.394735677983675), 'time': ['2016-09-01T00:00:00Z', '2018-08-31T23:59:59Z'], 'measurements': ['B04', 'B02', 'B08', 'B03', 'B8A']})
 
-_load_result1_19 = oeop.load_result(odc_cube=cube_user_gen, **{'product': '54dad8f8-9776-4373-8474-e2b940604d44', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}})
+_load_result1_19 = oeop.load_result(odc_cube=cube_user_gen, **{'product': '54dad8f8_9776_4373_8474_e2b940604d44', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}})
 _23_0 = oeop.predict_curve(**{'data': _28_18, 'function': extra_func_23_0, 'parameters': _load_result1_19, 'dimension': 't', 'labels': []})
 _saveresult1_20 = oeop.save_result(**{'data': _23_0, 'format': 'NETCDF'})

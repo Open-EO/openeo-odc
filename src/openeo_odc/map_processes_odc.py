@@ -76,8 +76,9 @@ def map_load_result(id, process) -> str:
 
     This needs to be handled separately because the user_generated ODC environment / cube must be used.
     """
+    product_name = process['arguments']['id'].replace("-", "_")
     params = {
-        'product': process['arguments']['id'],
+        'product': product_name,
         'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000},
         }
     return f"""
