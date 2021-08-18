@@ -3,7 +3,7 @@
 """
 
 from openeo_odc.map_processes_odc import map_general, map_load_collection, map_load_result
-from openeo_odc.utils import ExtraFuncUtils
+from openeo_odc.utils import ExtraFuncUtils, PROCESSES_WITH_VARIABLES
 
 
 def map_to_odc(graph, odc_env, odc_url):
@@ -22,7 +22,7 @@ def map_to_odc(graph, odc_env, odc_url):
         if cur_node.parent_process: #parent process can be eiter reduce_dimension or apply
             if cur_node.parent_process.process_id == 'reduce_dimension':
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
-        if cur_node.process_id in ["fit_curve", "predict_curve"]:
+        if cur_node.process_id in PROCESSES_WITH_VARIABLES:
             cur_node.content['arguments']['function'] = extra_func_utils.get_func_name(cur_node.id)
             extra_func[extra_func_utils.get_dict_key(cur_node.id)]["return"] = f"    return _{kwargs.pop('result_node')}\n\n"
 
@@ -32,7 +32,11 @@ def map_to_odc(graph, odc_env, odc_url):
         elif cur_node.process_id == 'load_result':
             cur_node_content = map_load_result(cur_node.id, cur_node.content)
         elif (params in set(cur_node.arguments.keys()) for params in param_sets):
-            cur_node_content = map_general(cur_node.id, cur_node.content, kwargs)
+            if cur_node.parent_process and cur_node.parent_process.process_id in PROCESSES_WITH_VARIABLES:
+                cur_node_content = map_general(cur_node.id, cur_node.content, kwargs,
+                                               donot_map_params=PROCESSES_WITH_VARIABLES[cur_node.parent_process.process_id])
+            else:
+                cur_node_content = map_general(cur_node.id, cur_node.content, kwargs)
         else:
             raise ValueError(f"Node {cur_node.id} with arguments {cur_node.arguments.keys()} could not be mapped!")
 
@@ -75,7 +79,9 @@ def resolve_from_parameter(node):
             continue
         if 'from_parameter' in node.arguments[argument]:
             try:
-                in_nodes[argument] = node.parent_process.arguments['data']['from_node']
+                # expected that parent process holds parameter in "data" argument
+                from_param_name = node.arguments[argument]['from_parameter']
+                in_nodes[from_param_name] = node.parent_process.arguments['data']['from_node']
             except KeyError:
                 pass
 

@@ -30,3 +30,11 @@ def get_oeop_str(id, process_name, params_str) -> str:
     oeop_name = get_py_process_name(process_name)
     return f"""{'_'+id} = oeop.{oeop_name}({params_str})
 """
+
+
+# Some processes require an additional function definition
+# their chil processes should not map the function parameters but rather handle them as variables
+PROCESSES_WITH_VARIABLES = {
+    "fit_curve": ["x", "parameters"],
+    "predict_curve": ["x", "parameters"],
+}
