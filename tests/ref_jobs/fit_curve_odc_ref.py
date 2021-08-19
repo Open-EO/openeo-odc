@@ -9,18 +9,18 @@ cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
 client = Client('tcp://xx.yyy.zz.kk:8786')
 
 
-def extra_func_18_0(x, *parameters):
+def extra_func_18_0(data, *parameters):
     _32frj455b_1 = oeop.pi(**{})
     _2sjyaa699_11 = oeop.pi(**{})
     _lyjcuq5vd_15 = oeop.multiply(**{'x': 2, 'y': _32frj455b_1})
     _9k6vt7qcn_2 = oeop.multiply(**{'x': 2, 'y': _2sjyaa699_11})
     _1ipvki94n_4 = oeop.divide(**{'x': _lyjcuq5vd_15, 'y': 31557600})
     _p42lrxmbq_16 = oeop.divide(**{'x': _9k6vt7qcn_2, 'y': 31557600})
-    _wz26aglyi_5 = oeop.multiply(**{'x': _p42lrxmbq_16, 'y': x})
+    _wz26aglyi_5 = oeop.multiply(**{'x': _p42lrxmbq_16, 'y': data})
     _kryhimf6r_6 = oeop.array_element(**{'data': parameters, 'index': 0})
     _jxs4umqsh_10 = oeop.array_element(**{'data': parameters, 'index': 1})
     _8jjjztmya_12 = oeop.array_element(**{'data': parameters, 'index': 2})
-    _ya3hbxpot_17 = oeop.multiply(**{'x': _1ipvki94n_4, 'y': x})
+    _ya3hbxpot_17 = oeop.multiply(**{'x': _1ipvki94n_4, 'y': data})
     _v81bsalku_7 = oeop.cos(**{'x': _wz26aglyi_5})
     _0p7xlqeyo_8 = oeop.sin(**{'x': _ya3hbxpot_17})
     _jhus2gz74_13 = oeop.multiply(**{'x': _jxs4umqsh_10, 'y': _v81bsalku_7})

@@ -7,7 +7,7 @@ class ExtraFuncUtils:
         return f"extra_{node_id}"
 
     def get_func_header(self, node_id) -> str:
-        return f"\n\ndef {self.get_func_name(node_id)}(x, *parameters):\n"
+        return f"\n\ndef {self.get_func_name(node_id)}(data, *parameters):\n"
 
 
 SUFFIXED_PROCESSES = [
@@ -35,6 +35,6 @@ def get_oeop_str(id, process_name, params_str) -> str:
 # Some processes require an additional function definition
 # their chil processes should not map the function parameters but rather handle them as variables
 PROCESSES_WITH_VARIABLES = {
-    "fit_curve": ["x", "parameters"],
-    "predict_curve": ["x", "parameters"],
+    "fit_curve": ["data", "parameters"],
+    "predict_curve": ["data", "parameters"],
 }
