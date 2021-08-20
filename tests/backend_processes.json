@@ -3090,6 +3090,421 @@
           "message": "A dimension with the specified name does not exist."
         }
       }
+    },
+    {
+      "id": "dimension_labels",
+      "summary": "Get the dimension labels",
+      "description": "Gives all labels for a dimension in the data cube. The labels have the same order as in the data cube.\n\nIf a dimension with the specified name does not exist, the process fails with a `DimensionNotAvailable` exception.",
+      "categories": [
+        "cubes"
+      ],
+      "parameters": [
+        {
+          "name": "data",
+          "description": "The data cube.",
+          "schema": {
+            "type": "object",
+            "subtype": "raster-cube"
+          }
+        },
+        {
+          "name": "dimension",
+          "description": "The name of the dimension to get the labels for.",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": {
+        "description": "The labels as an array.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        }
+      },
+      "exceptions": {
+        "DimensionNotAvailable": {
+          "message": "A dimension with the specified name does not exist."
+        }
+      }
+    },
+    {
+      "id": "eq",
+      "summary": "Equal to comparison",
+      "description": "Compares whether `x` is strictly equal to `y`.\n\n**Remarks:**\n\n* Data types MUST be checked strictly. For example, a string with the content *1* is not equal to the number *1*. Nevertheless, an integer *1* is equal to a floating-point number *1.0* as `integer` is a sub-type of `number`.\n* If any operand is `null`, the return value is `null`. Therefore, `eq(null, null)` returns `null` instead of `true`.\n* If any operand is an array or object, the return value is `false`.\n* Strings are expected to be encoded in UTF-8 by default.\n* Temporal strings MUST be compared differently than other strings and MUST NOT be compared based on their string representation due to different possible representations. For example, the time zone representation `Z` (for UTC) has the same meaning as `+00:00`.",
+      "categories": [
+        "texts",
+        "comparison"
+      ],
+      "parameters": [
+        {
+          "name": "x",
+          "description": "First operand.",
+          "schema": {
+            "description": "Any data type is allowed."
+          }
+        },
+        {
+          "name": "y",
+          "description": "Second operand.",
+          "schema": {
+            "description": "Any data type is allowed."
+          }
+        },
+        {
+          "name": "delta",
+          "description": "Only applicable for comparing two numbers. If this optional parameter is set to a positive non-zero number the equality of two numbers is checked against a delta value. This is especially useful to circumvent problems with floating-point inaccuracy in machine-based computation.\n\nThis option is basically an alias for the following computation: `lte(abs(minus([x, y]), delta)`",
+          "schema": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "default": null,
+          "optional": true
+        },
+        {
+          "name": "case_sensitive",
+          "description": "Only applicable for comparing two strings. Case sensitive comparison can be disabled by setting this parameter to `false`.",
+          "schema": {
+            "type": "boolean"
+          },
+          "default": true,
+          "optional": true
+        }
+      ],
+      "returns": {
+        "description": "`true` if `x` is equal to `y`, `null` if any operand is `null`, otherwise `false`.",
+        "schema": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "examples": [
+        {
+          "arguments": {
+            "x": 1,
+            "y": null
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "x": null,
+            "y": null
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "x": 1,
+            "y": 1
+          },
+          "returns": true
+        },
+        {
+          "arguments": {
+            "x": 1,
+            "y": "1"
+          },
+          "returns": false
+        },
+        {
+          "arguments": {
+            "x": 0,
+            "y": false
+          },
+          "returns": false
+        },
+        {
+          "arguments": {
+            "x": 1.02,
+            "y": 1,
+            "delta": 0.01
+          },
+          "returns": false
+        },
+        {
+          "arguments": {
+            "x": -1,
+            "y": -1.001,
+            "delta": 0.01
+          },
+          "returns": true
+        },
+        {
+          "arguments": {
+            "x": 115,
+            "y": 110,
+            "delta": 10
+          },
+          "returns": true
+        },
+        {
+          "arguments": {
+            "x": "Test",
+            "y": "test"
+          },
+          "returns": false
+        },
+        {
+          "arguments": {
+            "x": "Test",
+            "y": "test",
+            "case_sensitive": false
+          },
+          "returns": true
+        },
+        {
+          "arguments": {
+            "x": "Ä",
+            "y": "ä",
+            "case_sensitive": false
+          },
+          "returns": true
+        },
+        {
+          "arguments": {
+            "x": "00:00:00+00:00",
+            "y": "00:00:00Z"
+          },
+          "returns": true
+        },
+        {
+          "description": "`y` is not a valid date-time representation and therefore will be treated as a string so that the provided values are not equal.",
+          "arguments": {
+            "x": "2018-01-01T12:00:00Z",
+            "y": "2018-01-01T12:00:00"
+          },
+          "returns": false
+        },
+        {
+          "description": "01:00 in the time zone +1 is equal to 00:00 in UTC.",
+          "arguments": {
+            "x": "2018-01-01T00:00:00Z",
+            "y": "2018-01-01T01:00:00+01:00"
+          },
+          "returns": true
+        },
+        {
+          "arguments": {
+            "x": [
+              1,
+              2,
+              3
+            ],
+            "y": [
+              1,
+              2,
+              3
+            ]
+          },
+          "returns": false
+        }
+      ]
+    },
+    {
+      "id": "power",
+      "summary": "Exponentiation",
+      "description": "Computes the exponentiation for the base `base` raised to the power of `p`.\n\nThe no-data value `null` is passed through and therefore gets propagated if any of the arguments is `null`.",
+      "categories": [
+        "math",
+        "math > exponential & logarithmic"
+      ],
+      "parameters": [
+        {
+          "name": "base",
+          "description": "The numerical base.",
+          "schema": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "p",
+          "description": "The numerical exponent.",
+          "schema": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      ],
+      "returns": {
+        "description": "The computed value for `base` raised to the power of `p`.",
+        "schema": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "examples": [
+        {
+          "arguments": {
+            "base": 0,
+            "p": 2
+          },
+          "returns": 0
+        },
+        {
+          "arguments": {
+            "base": 2.5,
+            "p": 0
+          },
+          "returns": 1
+        },
+        {
+          "arguments": {
+            "base": 3,
+            "p": 3
+          },
+          "returns": 27
+        },
+        {
+          "arguments": {
+            "base": 5,
+            "p": -1
+          },
+          "returns": 0.2
+        },
+        {
+          "arguments": {
+            "base": 1,
+            "p": 0.5
+          },
+          "returns": 1
+        },
+        {
+          "arguments": {
+            "base": 1,
+            "p": null
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "base": null,
+            "p": 2
+          },
+          "returns": null
+        }
+      ],
+      "links": [
+        {
+          "rel": "about",
+          "href": "http://mathworld.wolfram.com/Power.html",
+          "title": "Power explained by Wolfram MathWorld"
+        }
+      ]
+    },
+    {
+      "id": "gt",
+      "summary": "Greater than comparison",
+      "description": "Compares whether `x` is strictly greater than `y`.\n\n**Remarks:**\n\n* If any operand is `null`, the return value is `null`.\n* If any operand is an array or object, the return value is `false`.\n* If any operand is not a `number` or temporal string (`date`, `time` or `date-time`), the process returns `false`.\n* Temporal strings can *not* be compared based on their string representation due to the time zone / time-offset representations.",
+      "categories": [
+        "comparison"
+      ],
+      "parameters": [
+        {
+          "name": "x",
+          "description": "First operand.",
+          "schema": {
+            "description": "Any data type is allowed."
+          }
+        },
+        {
+          "name": "y",
+          "description": "Second operand.",
+          "schema": {
+            "description": "Any data type is allowed."
+          }
+        }
+      ],
+      "returns": {
+        "description": "`true` if `x` is strictly greater than `y` or `null` if any operand is `null`, otherwise `false`.",
+        "schema": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "examples": [
+        {
+          "arguments": {
+            "x": 1,
+            "y": null
+          },
+          "returns": null
+        },
+        {
+          "arguments": {
+            "x": 0,
+            "y": 0
+          },
+          "returns": false
+        },
+        {
+          "arguments": {
+            "x": 2,
+            "y": 1
+          },
+          "returns": true
+        },
+        {
+          "arguments": {
+            "x": -0.5,
+            "y": -0.6
+          },
+          "returns": true
+        },
+        {
+          "arguments": {
+            "x": "00:00:00Z",
+            "y": "00:00:00+01:00"
+          },
+          "returns": true
+        },
+        {
+          "arguments": {
+            "x": "1950-01-01T00:00:00Z",
+            "y": "2018-01-01T12:00:00Z"
+          },
+          "returns": false
+        },
+        {
+          "arguments": {
+            "x": "2018-01-01T12:00:00+00:00",
+            "y": "2018-01-01T12:00:00Z"
+          },
+          "returns": false
+        },
+        {
+          "arguments": {
+            "x": true,
+            "y": 0
+          },
+          "returns": false
+        },
+        {
+          "arguments": {
+            "x": true,
+            "y": false
+          },
+          "returns": false
+        }
+      ]
     }
   ]
 }

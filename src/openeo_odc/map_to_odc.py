@@ -66,6 +66,7 @@ def resolve_from_parameter(node):
     Converts e.g. {'from_parameter': 'data'} to {'data': 'dc_0'}
 
     """
+    overlap_resolver_map = {"x": "cube1", "y": "cube2"}
 
     in_nodes = {}
 
@@ -79,9 +80,16 @@ def resolve_from_parameter(node):
             continue
         if 'from_parameter' in node.arguments[argument]:
             try:
-                # expected that parent process holds parameter in "data" argument
                 from_param_name = node.arguments[argument]['from_parameter']
-                in_nodes[from_param_name] = node.parent_process.arguments['data']['from_node']
+                # Handle overlap resolver for merge_cubes process
+                if node.parent_process.process_id == "merge_cubes" and \
+                        "overlap_resolver" in node.parent_process.arguments and \
+                        node.parent_process.arguments["overlap_resolver"]["from_node"] == node.id:
+                    parent_data_key = overlap_resolver_map[from_param_name]
+                    in_nodes[from_param_name] = node.parent_process.arguments[parent_data_key]["from_node"]
+                else:
+                    # expected that parent process holds parameter in "data" argument
+                    in_nodes[from_param_name] = node.parent_process.arguments['data']['from_node']
             except KeyError:
                 pass
 
