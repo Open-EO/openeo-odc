@@ -11,7 +11,7 @@ from openeo_pg_parser.validate import validate_processes
 
 
 @pytest.mark.parametrize(
-    "job_name", ("evi", "apply_job", "fit_curve")
+    "job_name", ("fit_curve_cm", "evi", "apply_job", "fit_curve", "load_result")
 )
 def test_job(job_name: str):
     """Create a xarray/opendatacube job based on an openEO process graph."""

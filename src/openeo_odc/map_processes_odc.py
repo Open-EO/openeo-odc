@@ -4,6 +4,7 @@
 from datetime import datetime
 import numpy as np
 from copy import deepcopy
+from typing import List
 
 from openeo_odc.utils import get_oeop_str
 
@@ -71,8 +72,22 @@ def map_load_collection(id, process):
 {'_'+id} = oeop.load_collection(odc_cube=cube, **{params})
 """
 
+def map_load_result(id, process) -> str:
+    """Map load_result process.
 
-def map_general(id, process, kwargs=None) -> str:
+    This needs to be handled separately because the user_generated ODC environment / cube must be used.
+    """
+    product_name = process['arguments']['id'].replace("-", "_")
+    params = {
+        'product': product_name,
+        'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000},
+        }
+    return f"""
+_{id} = oeop.load_result(odc_cube=cube_user_gen, **{params})
+"""
+
+
+def map_general(id, process, kwargs=None, donot_map_params: List[str] = None) -> str:
     """Map processes with required arguments only.
 
     Currently processes with params ('x', 'y'), ('data', 'value'), ('base', 'p'), and ('x') are supported.
@@ -91,7 +106,7 @@ def map_general(id, process, kwargs=None) -> str:
             params['reducer'] = {}
         _ = kwargs.pop('result_node', None)
     for key in params:
-        params[key] = convert_from_node_parameter(params[key], from_param)
+        params[key] = convert_from_node_parameter(params[key], from_param, donot_map_params)
 
     if 'data' in params:
         if 'dimension' in kwargs and not isinstance(params['data'], list):
@@ -106,7 +121,7 @@ def map_general(id, process, kwargs=None) -> str:
     return get_oeop_str(id, process_name, params_str)
 
 
-def convert_from_node_parameter(args_in, from_par=None):
+def convert_from_node_parameter(args_in, from_par=None, donot_map_params: List[str] = None):
     """ Convert from_node and resolve from_parameter dependencies."""
 
     if not isinstance(args_in, list):
@@ -119,7 +134,9 @@ def convert_from_node_parameter(args_in, from_par=None):
                 and isinstance(item, dict) \
                 and 'from_parameter' in item \
                 and item['from_parameter'] in from_par.keys():
-            if isinstance(from_par[item['from_parameter']], str):
+            if donot_map_params and item['from_parameter'] in donot_map_params:
+                args_in[k] = item["from_parameter"]
+            elif isinstance(from_par[item['from_parameter']], str):
                 args_in[k] = '_' + from_par[item['from_parameter']]
             else:
                 args_in[k] = from_par[item['from_parameter']]
