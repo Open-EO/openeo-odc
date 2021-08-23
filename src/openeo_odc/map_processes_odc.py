@@ -77,6 +77,7 @@ def map_load_result(id, process) -> str:
 
     This needs to be handled separately because the user_generated ODC environment / cube must be used.
     """
+    # ODC does not allow "-" in product names, there the job_id is slightly adopted to retrieve the product name
     product_name = process['arguments']['id'].replace("-", "_")
     params = {
         'product': product_name,
@@ -101,8 +102,9 @@ def map_general(id, process, kwargs=None, donot_map_params: List[str] = None) ->
     params = deepcopy(process['arguments'])
     from_param = kwargs['from_parameter'] if kwargs and 'from_parameter' in kwargs else None
     if 'result_node' in kwargs: #if result_node is in kwargs, data must always be in params
-        params['data'] = '_' + kwargs['result_node']
-        if process_name != 'apply' and process_name != 'fit_curve':
+        if process_name != 'merge_cubes':
+            params['data'] = '_' + kwargs['result_node']
+        if process_name not in ['apply', 'fit_curve', 'predict_curve', 'merge_cubes']:
             params['reducer'] = {}
         _ = kwargs.pop('result_node', None)
     for key in params:
@@ -168,13 +170,28 @@ def create_string(dict_input):
     **{'x':nir_2,'y':red_3}
 
     """
-
     inputs = []
     to_remove = []
     for key, value in dict_input.items():
-        if key in ('x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process'):
+        if key in ('x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process', 'cube1',
+                   'cube2', 'overlap_resolver', 'labels'):
             to_remove.append(key)
-            if isinstance(value, list):
+            # label can hold node references and datetime stings > this extra handling is required
+            if key == 'labels':
+                if isinstance(value, str) or value is None:
+                   if value is None or value.startswith('_'):
+                       inputs.append(f"'{key}': {value}")
+                   else:
+                       inputs.append(f"'{key}': '{value}'")
+                elif isinstance(value, list):
+                    val_str = "["
+                    for val in value:
+                        if (not isinstance(val, str)) or (isinstance(val, str) and val.startswith('_')):
+                            val_str += str(val) + ', '
+                        else:
+                            val_str += f"'{val}', "
+                    inputs.append(f"'{key}': {val_str[:-2]}]")
+            elif isinstance(value, list):
                 val_str = "["
                 for val in value:
                     val_str += str(val) + ', '

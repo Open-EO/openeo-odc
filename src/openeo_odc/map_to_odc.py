@@ -24,7 +24,7 @@ def map_to_odc(graph, odc_env, odc_url):
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
         if cur_node.process_id in PROCESSES_WITH_VARIABLES:
             cur_node.content['arguments']['function'] = extra_func_utils.get_func_name(cur_node.id)
-            extra_func[extra_func_utils.get_dict_key(cur_node.id)]["return"] = f"    return _{kwargs.pop('result_node')}\n\n"
+            extra_func[extra_func_utils.get_dict_key(cur_node.id)][f"return_{cur_node.id}"] = f"    return _{kwargs.pop('result_node')}\n\n"
 
         param_sets = [{'x', 'y'}, {'x', }, {'data', 'value'}, {'base', 'p'}, {'data', }]
         if cur_node.process_id == 'load_collection':
@@ -66,6 +66,7 @@ def resolve_from_parameter(node):
     Converts e.g. {'from_parameter': 'data'} to {'data': 'dc_0'}
 
     """
+    overlap_resolver_map = {"x": "cube1", "y": "cube2"}
 
     in_nodes = {}
 
@@ -79,9 +80,16 @@ def resolve_from_parameter(node):
             continue
         if 'from_parameter' in node.arguments[argument]:
             try:
-                # expected that parent process holds parameter in "data" argument
                 from_param_name = node.arguments[argument]['from_parameter']
-                in_nodes[from_param_name] = node.parent_process.arguments['data']['from_node']
+                # Handle overlap resolver for merge_cubes process
+                if node.parent_process.process_id == "merge_cubes" and \
+                        "overlap_resolver" in node.parent_process.arguments and \
+                        node.parent_process.arguments["overlap_resolver"]["from_node"] == node.id:
+                    parent_data_key = overlap_resolver_map[from_param_name]
+                    in_nodes[from_param_name] = node.parent_process.arguments[parent_data_key]["from_node"]
+                else:
+                    # expected that parent process holds parameter in "data" argument
+                    in_nodes[from_param_name] = node.parent_process.arguments['data']['from_node']
             except KeyError:
                 pass
 

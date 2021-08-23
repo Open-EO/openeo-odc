@@ -1,0 +1,250 @@
+{
+  "process_graph": {
+    "1": {
+      "process_id": "load_result",
+      "arguments": {
+        "id": "jb-fa7a7188-c3ce-40fb-85d8-a5443ac112c3"
+      }
+    },
+    "2": {
+      "process_id": "apply",
+      "arguments": {
+        "data": {
+          "from_node": "loadcollection1"
+        },
+        "process": {
+          "process_graph": {
+            "1": {
+              "process_id": "eq",
+              "arguments": {
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 0
+              },
+              "result": true
+            }
+          }
+        }
+      }
+    },
+    "3": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube1": {
+          "from_node": "fitcurve1"
+        },
+        "cube2": {
+          "from_node": "2"
+        },
+        "overlap_resolver": {
+          "process_graph": {
+            "1": {
+              "process_id": "multiply",
+              "arguments": {
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": {
+                  "from_parameter": "y"
+                }
+              },
+              "result": true
+            }
+          }
+        }
+      }
+    },
+    "loadcollection1": {
+      "process_id": "load_collection",
+      "arguments": {
+        "bands": [
+          "B02",
+          "B03",
+          "B04",
+          "B05",
+          "B08"
+        ],
+        "id": "boa_sentinel_2",
+        "spatial_extent": {
+          "east": 11.413905,
+          "north": 46.343144,
+          "south": 46.341515,
+          "west": 11.410299
+        },
+        "temporal_extent": [
+          "2016-09-01",
+          "2018-09-01"
+        ]
+      }
+    },
+    "apply2": {
+      "process_id": "apply",
+      "arguments": {
+        "data": {
+          "from_node": "loadcollection1"
+        },
+        "process": {
+          "process_graph": {
+            "clip1": {
+              "arguments": {
+                "max": 4000,
+                "min": 0,
+                "x": {
+                  "from_parameter": "x"
+                }
+              },
+              "process_id": "clip",
+              "result": true
+            }
+          }
+        }
+      }
+    },
+    "dimension_labels1": {
+      "process_id": "dimension_labels",
+      "arguments": {
+        "data": {
+          "from_node": "apply2"
+        },
+        "dimension": "t"
+      }
+    },
+    "fitcurve1": {
+      "process_id": "predict_curve",
+      "arguments": {
+        "data": {
+          "from_node": "apply2"
+        },
+        "dimension": "t",
+        "function": {
+          "process_graph": {
+            "add1": {
+              "arguments": {
+                "x": {
+                  "from_node": "arrayelement1"
+                },
+                "y": {
+                  "from_node": "multiply2"
+                }
+              },
+              "process_id": "add"
+            },
+            "add2": {
+              "arguments": {
+                "x": {
+                  "from_node": "add1"
+                },
+                "y": {
+                  "from_node": "multiply4"
+                }
+              },
+              "process_id": "add",
+              "result": true
+            },
+            "arrayelement1": {
+              "arguments": {
+                "data": {
+                  "from_parameter": "parameters"
+                },
+                "index": 0
+              },
+              "process_id": "array_element"
+            },
+            "arrayelement2": {
+              "arguments": {
+                "data": {
+                  "from_parameter": "parameters"
+                },
+                "index": 1
+              },
+              "process_id": "array_element"
+            },
+            "arrayelement3": {
+              "arguments": {
+                "data": {
+                  "from_parameter": "parameters"
+                },
+                "index": 2
+              },
+              "process_id": "array_element"
+            },
+            "cos1": {
+              "arguments": {
+                "x": {
+                  "from_node": "multiply1"
+                }
+              },
+              "process_id": "cos"
+            },
+            "multiply1": {
+              "arguments": {
+                "x": 1.991021277657232e-7,
+                "y": {
+                  "from_parameter": "data"
+                }
+              },
+              "process_id": "multiply"
+            },
+            "multiply2": {
+              "arguments": {
+                "x": {
+                  "from_node": "arrayelement2"
+                },
+                "y": {
+                  "from_node": "cos1"
+                }
+              },
+              "process_id": "multiply"
+            },
+            "multiply3": {
+              "arguments": {
+                "x": 1.991021277657232e-7,
+                "y": {
+                  "from_parameter": "data"
+                }
+              },
+              "process_id": "multiply"
+            },
+            "multiply4": {
+              "arguments": {
+                "x": {
+                  "from_node": "arrayelement3"
+                },
+                "y": {
+                  "from_node": "sin1"
+                }
+              },
+              "process_id": "multiply"
+            },
+            "sin1": {
+              "arguments": {
+                "x": {
+                  "from_node": "multiply3"
+                }
+              },
+              "process_id": "sin"
+            }
+          }
+        },
+        "parameters": {
+          "from_node": "1"
+        },
+        "labels": {
+          "from_node": "dimension_labels1"
+        }
+      }
+    },
+    "saveresult1": {
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "3"
+        },
+        "format": "NetCDF",
+        "options": {}
+      },
+      "result": true
+    }
+  }
+}
