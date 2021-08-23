@@ -24,7 +24,7 @@ def map_to_odc(graph, odc_env, odc_url):
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
         if cur_node.process_id in PROCESSES_WITH_VARIABLES:
             cur_node.content['arguments']['function'] = extra_func_utils.get_func_name(cur_node.id)
-            extra_func[extra_func_utils.get_dict_key(cur_node.id)]["return"] = f"    return _{kwargs.pop('result_node')}\n\n"
+            extra_func[extra_func_utils.get_dict_key(cur_node.id)][f"return_{cur_node.id}"] = f"    return _{kwargs.pop('result_node')}\n\n"
 
         param_sets = [{'x', 'y'}, {'x', }, {'data', 'value'}, {'base', 'p'}, {'data', }]
         if cur_node.process_id == 'load_collection':
