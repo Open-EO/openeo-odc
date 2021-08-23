@@ -104,7 +104,7 @@ def map_general(id, process, kwargs=None, donot_map_params: List[str] = None) ->
     if 'result_node' in kwargs: #if result_node is in kwargs, data must always be in params
         if process_name != 'merge_cubes':
             params['data'] = '_' + kwargs['result_node']
-        if process_name not in ['apply', 'fit_curve', 'predict_curve']:
+        if process_name not in ['apply', 'fit_curve', 'predict_curve', 'merge_cubes']:
             params['reducer'] = {}
         _ = kwargs.pop('result_node', None)
     for key in params:

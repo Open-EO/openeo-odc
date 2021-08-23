@@ -51,5 +51,5 @@ _dimension_labels1_21 = oeop.dimension_labels(**{'data': _apply2_17, 'dimension'
 _4_4 = oeop.fit_curve(**{'parameters': [1, 1, 1], 'data': _apply3_19, 'function': extra_func_4_4, 'dimension': 't'})
 _fitcurve1_22 = oeop.predict_curve(**{'data': _apply2_17, 'function': extra_func_fitcurve1_22, 'parameters': _4_4, 'labels': _dimension_labels1_21, 'dimension': 't'})
 _1_3 = oeop.multiply(**{'x': _fitcurve1_22, 'y': _2_0})
-_3_2 = oeop.merge_cubes(**{'cube1': _fitcurve1_22, 'cube2': _2_0, 'overlap_resolver': _1_3, 'reducer': {}})
+_3_2 = oeop.merge_cubes(**{'cube1': _fitcurve1_22, 'cube2': _2_0, 'overlap_resolver': _1_3})
 _saveresult1_34 = oeop.save_result(**{'data': _3_2, 'format': 'NetCDF', 'options': {}})
