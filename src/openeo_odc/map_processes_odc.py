@@ -170,14 +170,28 @@ def create_string(dict_input):
     **{'x':nir_2,'y':red_3}
 
     """
-
     inputs = []
     to_remove = []
     for key, value in dict_input.items():
         if key in ('x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process', 'cube1',
                    'cube2', 'overlap_resolver', 'labels'):
             to_remove.append(key)
-            if isinstance(value, list):
+            # label can hold node references and datetime stings > this extra handling is required
+            if key == 'labels':
+                if isinstance(value, str) or value is None:
+                   if value is None or value.startswith('_'):
+                       inputs.append(f"'{key}': {value}")
+                   else:
+                       inputs.append(f"'{key}': '{value}'")
+                elif isinstance(value, list):
+                    val_str = "["
+                    for val in value:
+                        if (not isinstance(val, str)) or (isinstance(val, str) and val.startswith('_')):
+                            val_str += str(val) + ', '
+                        else:
+                            val_str += f"'{val}', "
+                    inputs.append(f"'{key}': {val_str[:-2]}]")
+            elif isinstance(value, list):
                 val_str = "["
                 for val in value:
                     val_str += str(val) + ', '

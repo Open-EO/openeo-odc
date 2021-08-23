@@ -137,11 +137,11 @@ def test_power(arg_in: Dict[str, Any], arg_out: str):
         ({'data': {'from_node': 'cube'}, 'parameters': {'from_node': 'data_2'}, 'function': {'from_node': 'udf'}, 'dimension': 't'},
          "{'data': _cube, 'parameters': _data_2, 'function': _udf, 'dimension': 't'}"),
         ({'data': {'from_node': 'cube'}, 'parameters': {'from_node': 'data_2'}, 'function': {'from_node': 'udf'}, 'dimension': 't', 'labels': None},
-         "{'data': _cube, 'parameters': _data_2, 'function': _udf, 'dimension': 't', 'labels': None}"),
+         "{'data': _cube, 'parameters': _data_2, 'function': _udf, 'labels': None, 'dimension': 't'}"),
         ({'data': {'from_node': 'cube'}, 'parameters': {'from_node': 'data_2'}, 'function': {'from_node': 'udf'}, 'dimension': 't', 'labels': '2000-01-01T00:00:00Z'},
-         "{'data': _cube, 'parameters': _data_2, 'function': _udf, 'dimension': 't', 'labels': '2000-01-01T00:00:00Z'}"),
+         "{'data': _cube, 'parameters': _data_2, 'function': _udf, 'labels': '2000-01-01T00:00:00Z', 'dimension': 't'}"),
         ({'data': {'from_node': 'cube'}, 'parameters': {'from_node': 'data_2'}, 'function': {'from_node': 'udf'}, 'dimension': 't', 'labels': ['2000-01-01T00:00:00Z', '2000-01-02T00:00:00Z']},
-         "{'data': _cube, 'parameters': _data_2, 'function': _udf, 'dimension': 't', 'labels': ['2000-01-01T00:00:00Z', '2000-01-02T00:00:00Z']}"),
+         "{'data': _cube, 'parameters': _data_2, 'function': _udf, 'labels': ['2000-01-01T00:00:00Z', '2000-01-02T00:00:00Z'], 'dimension': 't'}"),
     ]
 )
 def get_fit_param(request):
