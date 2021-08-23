@@ -175,7 +175,7 @@ def create_string(dict_input):
     to_remove = []
     for key, value in dict_input.items():
         if key in ('x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process', 'cube1',
-                   'cube2', 'overlap_resolver'):
+                   'cube2', 'overlap_resolver', 'labels'):
             to_remove.append(key)
             if isinstance(value, list):
                 val_str = "["
