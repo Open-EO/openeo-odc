@@ -9,9 +9,9 @@ cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
 client = Client('tcp://xx.yyy.zz.kk:8786')
 
 
-def extra_func_4_4(data, *parameters):
-    _multiply1_5 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': data})
-    _multiply3_7 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': data})
+def extra_func_4_4(x, *parameters):
+    _multiply1_5 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': x})
+    _multiply3_7 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': x})
     _arrayelement3_9 = oeop.array_element(**{'data': parameters, 'index': 2})
     _arrayelement2_10 = oeop.array_element(**{'data': parameters, 'index': 1})
     _arrayelement1_11 = oeop.array_element(**{'data': parameters, 'index': 0})
@@ -25,12 +25,12 @@ def extra_func_4_4(data, *parameters):
 
 
 
-def extra_func_fitcurve1_22(data, *parameters):
+def extra_func_fitcurve1_22(x, *parameters):
     _arrayelement1_25 = oeop.array_element(**{'data': parameters, 'index': 0})
     _arrayelement2_26 = oeop.array_element(**{'data': parameters, 'index': 1})
     _arrayelement3_27 = oeop.array_element(**{'data': parameters, 'index': 2})
-    _multiply1_29 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': data})
-    _multiply3_31 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': data})
+    _multiply1_29 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': x})
+    _multiply3_31 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': x})
     _cos1_28 = oeop.cos(**{'x': _multiply1_29})
     _sin1_33 = oeop.sin(**{'x': _multiply3_31})
     _multiply2_30 = oeop.multiply(**{'x': _arrayelement2_26, 'y': _cos1_28})

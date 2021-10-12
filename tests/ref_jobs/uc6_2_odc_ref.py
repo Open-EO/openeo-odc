@@ -9,12 +9,12 @@ cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
 client = Client('tcp://xx.yyy.zz.kk:8786')
 
 
-def extra_func_fitcurve1_9(data, *parameters):
+def extra_func_fitcurve1_9(x, *parameters):
     _arrayelement1_12 = oeop.array_element(**{'data': parameters, 'index': 0})
     _arrayelement2_13 = oeop.array_element(**{'data': parameters, 'index': 1})
     _arrayelement3_14 = oeop.array_element(**{'data': parameters, 'index': 2})
-    _multiply1_16 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': data})
-    _multiply3_18 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': data})
+    _multiply1_16 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': x})
+    _multiply3_18 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': x})
     _cos1_15 = oeop.cos(**{'x': _multiply1_16})
     _sin1_20 = oeop.sin(**{'x': _multiply3_18})
     _multiply2_17 = oeop.multiply(**{'x': _arrayelement2_13, 'y': _cos1_15})

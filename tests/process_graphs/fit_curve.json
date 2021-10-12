@@ -49,7 +49,7 @@
                   "from_node": "p42lrxmbq"
                 },
                 "y": {
-                  "from_parameter": "data"
+                  "from_parameter": "x"
                 }
               }
             },
@@ -158,7 +158,7 @@
                   "from_node": "1ipvki94n"
                 },
                 "y": {
-                  "from_parameter": "data"
+                  "from_parameter": "x"
                 }
               }
             }

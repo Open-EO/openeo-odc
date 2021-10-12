@@ -68,7 +68,7 @@
                                 "arguments": {
                                     "x": 1.991021277657232e-7,
                                     "y": {
-                                        "from_parameter": "data"
+                                        "from_parameter": "x"
                                     }
                                 }
                             },
@@ -88,7 +88,7 @@
                                 "arguments": {
                                     "x": 1.991021277657232e-7,
                                     "y": {
-                                        "from_parameter": "data"
+                                        "from_parameter": "x"
                                     }
                                 }
                             },
@@ -322,7 +322,7 @@
                                 "arguments": {
                                     "x": 1.991021277657232e-7,
                                     "y": {
-                                        "from_parameter": "data"
+                                        "from_parameter": "x"
                                     }
                                 },
                                 "process_id": "multiply"
@@ -342,7 +342,7 @@
                                 "arguments": {
                                     "x": 1.991021277657232e-7,
                                     "y": {
-                                        "from_parameter": "data"
+                                        "from_parameter": "x"
                                     }
                                 },
                                 "process_id": "multiply"

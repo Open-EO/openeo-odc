@@ -1,3 +1,6 @@
+from collections import namedtuple
+
+
 class ExtraFuncUtils:
 
     def get_func_name(self, node_id: str) -> str:
@@ -6,8 +9,8 @@ class ExtraFuncUtils:
     def get_dict_key(self, node_id: str) -> str:
         return f"extra_{node_id}"
 
-    def get_func_header(self, node_id) -> str:
-        return f"\n\ndef {self.get_func_name(node_id)}(data, *parameters):\n"
+    def get_func_header(self, node_id: str, func_param_str: str) -> str:
+        return f"\n\ndef {self.get_func_name(node_id)}({func_param_str}):\n"
 
 
 SUFFIXED_PROCESSES = [
@@ -34,7 +37,8 @@ def get_oeop_str(id, process_name, params_str) -> str:
 
 # Some processes require an additional function definition
 # their chil processes should not map the function parameters but rather handle them as variables
-PROCESSES_WITH_VARIABLES = {
-    "fit_curve": ["data", "parameters"],
-    "predict_curve": ["data", "parameters"],
+ParamViews = namedtuple("ParamViews", ["list", "str"])
+PROCS_WITH_VARS = {
+    "fit_curve": ParamViews(["x", "parameters"], "x, *parameters"),
+    "predict_curve": ParamViews(["x", "parameters"], "x, *parameters"),
 }

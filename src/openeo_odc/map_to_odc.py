@@ -3,7 +3,7 @@
 """
 
 from openeo_odc.map_processes_odc import map_general, map_load_collection, map_load_result
-from openeo_odc.utils import ExtraFuncUtils, PROCESSES_WITH_VARIABLES
+from openeo_odc.utils import ExtraFuncUtils, PROCS_WITH_VARS
 
 
 def map_to_odc(graph, odc_env, odc_url):
@@ -14,15 +14,16 @@ def map_to_odc(graph, odc_env, odc_url):
     extra_func = {}
     for k, node_id in enumerate(graph.ids):
         cur_node = graph[node_id]
+        parent_proc_id = cur_node.parent_process.process_id if cur_node.parent_process else None
 
         kwargs = {}
         kwargs['from_parameter'] = resolve_from_parameter(cur_node)
         if len(cur_node.result_processes) == 1:
             kwargs['result_node'] = cur_node.result_processes[0].id
         if cur_node.parent_process: #parent process can be eiter reduce_dimension or apply
-            if cur_node.parent_process.process_id == 'reduce_dimension':
+            if parent_proc_id == 'reduce_dimension':
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
-        if cur_node.process_id in PROCESSES_WITH_VARIABLES:
+        if cur_node.process_id in PROCS_WITH_VARS:
             cur_node.content['arguments']['function'] = extra_func_utils.get_func_name(cur_node.id)
             extra_func[extra_func_utils.get_dict_key(cur_node.id)][f"return_{cur_node.id}"] = f"    return _{kwargs.pop('result_node')}\n\n"
 
@@ -32,20 +33,22 @@ def map_to_odc(graph, odc_env, odc_url):
         elif cur_node.process_id == 'load_result':
             cur_node_content = map_load_result(cur_node.id, cur_node.content)
         elif (params in set(cur_node.arguments.keys()) for params in param_sets):
-            if cur_node.parent_process and cur_node.parent_process.process_id in PROCESSES_WITH_VARIABLES:
+            if cur_node.parent_process and parent_proc_id in PROCS_WITH_VARS:
                 cur_node_content = map_general(cur_node.id, cur_node.content, kwargs,
-                                               donot_map_params=PROCESSES_WITH_VARIABLES[cur_node.parent_process.process_id])
+                                               donot_map_params=PROCS_WITH_VARS[parent_proc_id].list)
             else:
                 cur_node_content = map_general(cur_node.id, cur_node.content, kwargs)
         else:
             raise ValueError(f"Node {cur_node.id} with arguments {cur_node.arguments.keys()} could not be mapped!")
 
         # Handle fit_curve / predict_curve sub-process-graph
-        if cur_node.parent_process and cur_node.parent_process.process_id in ["fit_curve", "predict_curve"]:
+        if cur_node.parent_process and parent_proc_id in PROCS_WITH_VARS:
             fc_id = cur_node.parent_process.id
             fc_name = extra_func_utils.get_dict_key(fc_id)
             if fc_name not in extra_func:
-                extra_func[fc_name] = {f"func_header_{fc_id}": extra_func_utils.get_func_header(fc_id)}
+                extra_func[fc_name] = {
+                    f"func_header_{fc_id}": extra_func_utils.get_func_header(fc_id, PROCS_WITH_VARS[parent_proc_id].str)
+                }
             extra_func[fc_name][cur_node.id] = f"    {cur_node_content}"  # add indentation
         else:
             nodes[cur_node.id] = cur_node_content

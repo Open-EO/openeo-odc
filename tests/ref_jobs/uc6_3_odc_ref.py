@@ -9,9 +9,9 @@ cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
 client = Client('tcp://xx.yyy.zz.kk:8786')
 
 
-def extra_func_predictcurve1_12(data, *parameters):
-    _multiply1_13 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': data})
-    _multiply3_15 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': data})
+def extra_func_predictcurve1_12(x, *parameters):
+    _multiply1_13 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': x})
+    _multiply3_15 = oeop.multiply(**{'x': 1.991021277657232e-07, 'y': x})
     _arrayelement3_17 = oeop.array_element(**{'data': parameters, 'index': 2})
     _arrayelement2_18 = oeop.array_element(**{'data': parameters, 'index': 1})
     _arrayelement1_19 = oeop.array_element(**{'data': parameters, 'index': 0})
