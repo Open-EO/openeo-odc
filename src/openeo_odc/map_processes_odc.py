@@ -126,8 +126,10 @@ def map_general(id, process, kwargs=None, donot_map_params: List[str] = None) ->
 def convert_from_node_parameter(args_in, from_par=None, donot_map_params: List[str] = None):
     """ Convert from_node and resolve from_parameter dependencies."""
 
+    was_list = True
     if not isinstance(args_in, list):
         args_in = [args_in]
+        was_list = False
 
     for k, item in enumerate(args_in):
         if isinstance(item, dict) and 'from_node' in item:
@@ -145,7 +147,7 @@ def convert_from_node_parameter(args_in, from_par=None, donot_map_params: List[s
         elif isinstance(item, dict) and 'from_parameter' in item:
             args_in[k] = item["from_parameter"]
 
-    if len(args_in) == 1:
+    if len(args_in) == 1 and not was_list:
         args_in = args_in[0]
 
     return args_in
