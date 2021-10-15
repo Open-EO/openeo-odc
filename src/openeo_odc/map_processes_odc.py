@@ -7,6 +7,7 @@ from copy import deepcopy
 from typing import List
 
 from openeo_odc.utils import get_oeop_str
+from openeo_odc.string_creation import create_param_string
 
 
 def map_load_collection(id, process):
@@ -119,15 +120,17 @@ def map_general(id, process, kwargs=None, donot_map_params: List[str] = None) ->
         _ = kwargs.pop('from_parameter', None)
         params = {**params, **kwargs}
 
-    params_str = create_string(params)
+    params_str = create_param_string(params, process_name)
     return get_oeop_str(id, process_name, params_str)
 
 
 def convert_from_node_parameter(args_in, from_par=None, donot_map_params: List[str] = None):
     """ Convert from_node and resolve from_parameter dependencies."""
 
+    was_list = True
     if not isinstance(args_in, list):
         args_in = [args_in]
+        was_list = False
 
     for k, item in enumerate(args_in):
         if isinstance(item, dict) and 'from_node' in item:
@@ -145,7 +148,7 @@ def convert_from_node_parameter(args_in, from_par=None, donot_map_params: List[s
         elif isinstance(item, dict) and 'from_parameter' in item:
             args_in[k] = item["from_parameter"]
 
-    if len(args_in) == 1:
+    if len(args_in) == 1 and not was_list:
         args_in = args_in[0]
 
     return args_in
@@ -159,53 +162,3 @@ def check_dimension(in_value):
     elif in_value in ('s', 'band', 'bands', 'spectral'):
         return 'bands'
     return in_value
-
-
-def create_string(dict_input):
-    """Creates a string where 'x', 'y' and 'data' fields are not mapped to str.
-
-    For example:
-    **{'data':dc_0,'index':0, 'dimension':'bands'}
-    **{'data':[10000, nir_2, p1_6, p2_7]}
-    **{'x':nir_2,'y':red_3}
-
-    """
-    inputs = []
-    to_remove = []
-    for key, value in dict_input.items():
-        if key in ('x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process', 'cube1',
-                   'cube2', 'overlap_resolver', 'labels'):
-            to_remove.append(key)
-            # label can hold node references and datetime stings > this extra handling is required
-            if key == 'labels':
-                if isinstance(value, str) or value is None:
-                   if value is None or value.startswith('_'):
-                       inputs.append(f"'{key}': {value}")
-                   else:
-                       inputs.append(f"'{key}': '{value}'")
-                elif isinstance(value, list):
-                    val_str = "["
-                    for val in value:
-                        if (not isinstance(val, str)) or (isinstance(val, str) and val.startswith('_')):
-                            val_str += str(val) + ', '
-                        else:
-                            val_str += f"'{val}', "
-                    inputs.append(f"'{key}': {val_str[:-2]}]")
-            elif isinstance(value, list):
-                val_str = "["
-                for val in value:
-                    val_str += str(val) + ', '
-                inputs.append(f"'{key}': {val_str[:-2]}]")
-            else:
-                inputs.append(f"'{key}': {value}")
-        else:
-            continue
-
-    for key in to_remove:
-        _ = dict_input.pop(key)
-
-    replace_str = '{' + ', '.join(inputs)
-    if dict_input:
-        replace_str += ', '
-
-    return f"**{dict_input}".replace('{', replace_str, 1)
