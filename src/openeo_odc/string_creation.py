@@ -2,7 +2,7 @@
 # value: parameter keys where ' should be removed from the values > so turned from string into python variable
 PROCESS_ARG_MAP = {
     'default': ['x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process', 'cube1',
-                   'cube2', 'overlap_resolver', 'labels'],
+                   'cube2', 'overlap_resolver', 'labels', 'mask'],
     'rename_labels': ['data'],
 }
 
