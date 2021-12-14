@@ -2,8 +2,9 @@
 # value: parameter keys where ' should be removed from the values > so turned from string into python variable
 PROCESS_ARG_MAP = {
     'default': ['x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process', 'cube1',
-                   'cube2', 'overlap_resolver', 'labels', 'mask'],
+                   'cube2', 'overlap_resolver', 'labels', 'mask', 'reducer', 'extent', 'geometries', 'context'],
     'rename_labels': ['data'],
+    'rename_dimension': ['data'],
 }
 
 
@@ -37,6 +38,12 @@ def create_param_string(dict_input: dict, process_name: str):
                         else:
                             val_str += f"'{val}', "
                     inputs.append(f"'{key}': {val_str[:-2]}]")
+            elif key == 'reducer' or key == 'process':
+                if isinstance(value, str):
+                    if value is None or value.startswith('_'):
+                        inputs.append(f"'{key}': {value}")
+                    else:
+                        inputs.append(f"'{key}': oeop.{value}")
             elif isinstance(value, list):
                 val_str = "["
                 for val in value:
