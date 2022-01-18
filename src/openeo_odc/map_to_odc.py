@@ -29,6 +29,10 @@ def map_to_odc(graph, odc_env, odc_url):
                 # the 'mean' gets transformed to 'oeop.mean' in the string_creation.create_param_string function.
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
                 cur_node.parent_process.content['arguments']['process'] = cur_node.process_id
+            if parent_proc_id == 'aggregate_temporal_period':
+                cur_node.parent_process.content['arguments']['reducer'] = cur_node.process_id
+            if parent_proc_id == 'filter_labels':
+                cur_node.parent_process.content['arguments']['condition'] = cur_node.process_id
 
         if cur_node.process_id in PROCS_WITH_VARS:
             cur_node.content['arguments']['function'] = extra_func_utils.get_func_name(cur_node.id)

@@ -5,6 +5,8 @@ PROCESS_ARG_MAP = {
                    'cube2', 'overlap_resolver', 'labels', 'mask', 'geometries'],
     'rename_labels': ['data'],
     'rename_dimension': ['data'],
+    'aggregate_temporal_period': ['data', 'reducer'],
+    'filter_labels': ['data', 'condition']
 }
 
 
@@ -39,7 +41,7 @@ def create_param_string(dict_input: dict, process_name: str):
                             val_str += f"'{val}', "
                     inputs.append(f"'{key}': {val_str[:-2]}]")
             # in apply_dimension a callable process from oeop is needed, this converts 'mean' into 'oeop.mean'!
-            elif key == 'process' and process_name == 'apply_dimension':
+            elif key in ['process', 'reducer', 'condition'] and process_name in ['apply_dimension', 'aggregate_temporal_period', 'filter_labels']:
                 if isinstance(value, str):
                     if value is None or value.startswith('_'):
                         inputs.append(f"'{key}': {value}")

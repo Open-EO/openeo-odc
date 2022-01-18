@@ -142,9 +142,9 @@ def map_general(id, process, kwargs=None, donot_map_params: List[str] = None) ->
     params = deepcopy(process['arguments'])
     from_param = kwargs['from_parameter'] if kwargs and 'from_parameter' in kwargs else None
     if 'result_node' in kwargs: #if result_node is in kwargs, data must always be in params
-        if process_name not in ['merge_cubes', 'apply_dimension']:
+        if process_name not in ['merge_cubes', 'apply_dimension', 'aggregate_temporal_period', 'filter_labels']:
             params['data'] = '_' + kwargs['result_node']
-        if process_name not in ['apply', 'fit_curve', 'predict_curve', 'merge_cubes', 'apply_dimension']:
+        if process_name not in ['apply', 'fit_curve', 'predict_curve', 'merge_cubes', 'apply_dimension', 'aggregate_temporal_period', 'filter_labels']:
             params['reducer'] = {}
         _ = kwargs.pop('result_node', None)
     for key in params:

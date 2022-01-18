@@ -158,3 +158,27 @@ def test_curve(process: str, get_fit_param: Tuple[str, Dict[str, Any], str]):
     out = map_general(node_id, process_def)
 
     assert out == process_ref
+
+
+@pytest.mark.parametrize("arg_in,arg_out", (
+        ({'data': {'from_node': 'data'}, 'condition': 'gt', 'dimension': 'time', 'context': {'y': 20}}, "{'data': _data, 'condition': oeop.gt, 'dimension': 'time', 'context': {'y': 20}}"),
+))
+def test_filter_labels(arg_in: Dict[str, Any], arg_out: str):
+    """Test conversions of filter_labels process."""
+    node_id, process_def, process_ref = set_process(*create_params("node_filter_labels", arg_in, arg_out), "filter_labels")
+
+    out = map_general(node_id, process_def)
+
+    assert out == process_ref
+
+
+@pytest.mark.parametrize("arg_in,arg_out", (
+        ({'data': {'from_node': 'data'}, 'reducer': 'sum', 'dimension': 'time'}, "{'data': _data, 'reducer': oeop.sum, 'dimension': 'time'}"),
+))
+def test_aggregate_temporal_period(arg_in: Dict[str, Any], arg_out: str):
+    """Test conversions of aggregate_temporal_period process."""
+    node_id, process_def, process_ref = set_process(*create_params("node_aggregate_temporal_period", arg_in, arg_out), "aggregate_temporal_period")
+
+    out = map_general(node_id, process_def)
+
+    assert out == process_ref
