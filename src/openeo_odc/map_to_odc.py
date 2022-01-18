@@ -23,6 +23,10 @@ def map_to_odc(graph, odc_env, odc_url):
         if cur_node.parent_process: #parent process can be eiter reduce_dimension or apply
             if parent_proc_id == 'reduce_dimension':
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
+            if parent_proc_id == 'apply_dimension':
+                kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
+                cur_node.parent_process.content['arguments']['process'] = cur_node.process_id
+
         if cur_node.process_id in PROCS_WITH_VARS:
             cur_node.content['arguments']['function'] = extra_func_utils.get_func_name(cur_node.id)
             extra_func[extra_func_utils.get_dict_key(cur_node.id)][f"return_{cur_node.id}"] = f"    return _{kwargs.pop('result_node')}\n\n"
