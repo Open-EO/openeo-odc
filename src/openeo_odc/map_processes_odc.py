@@ -103,6 +103,8 @@ def map_load_result(id, process) -> str:
                     highLon     = np.max([[el[0] for el in polygon[0]]])
                     params['x'] = (lowLon,highLon)
                     params['y'] = (lowLat,highLat)
+            if 'crs' in process['arguments']['spatial_extent']:
+                params['crs'] = process['arguments']['spatial_extent']['crs']
 
     if 'temporal_extent' in process['arguments']:
         params['time'] = []
@@ -116,8 +118,6 @@ def map_load_result(id, process) -> str:
             if process['arguments']['temporal_extent'][1] is not None:
                 timeEnd = process['arguments']['temporal_extent'][1]
             params['time'] = [timeStart,exclusive_date(timeEnd)]
-    if 'crs' in process['arguments']['spatial_extent']:
-        params['crs'] = process['arguments']['spatial_extent']['crs']
 
     if 'bands' in process['arguments'] and process['arguments']['bands'] is not None and len(process['arguments']['bands'])>0:
         params['measurements'] = []
