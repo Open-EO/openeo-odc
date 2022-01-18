@@ -38,6 +38,7 @@ def create_param_string(dict_input: dict, process_name: str):
                         else:
                             val_str += f"'{val}', "
                     inputs.append(f"'{key}': {val_str[:-2]}]")
+            # in apply_dimension a callable process from oeop is needed, this converts 'mean' into 'oeop.mean'!
             elif key == 'process' and process_name == 'apply_dimension':
                 if isinstance(value, str):
                     if value is None or value.startswith('_'):
