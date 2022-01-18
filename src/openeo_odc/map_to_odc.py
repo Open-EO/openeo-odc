@@ -22,7 +22,18 @@ def map_to_odc(graph, odc_env, odc_url):
             kwargs['result_node'] = cur_node.result_processes[0].id
         if cur_node.parent_process: #parent process can be eiter reduce_dimension or apply
             if parent_proc_id == 'reduce_dimension':
+                # in apply and reduce_dimension the process is the node of the child process
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
+            if parent_proc_id == 'apply_dimension':
+                # in apply_dimension the process should be a callable process, for example 'mean'.
+                # the 'mean' gets transformed to 'oeop.mean' in the string_creation.create_param_string function.
+                kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
+                cur_node.parent_process.content['arguments']['process'] = cur_node.process_id
+            if parent_proc_id == 'aggregate_temporal_period':
+                cur_node.parent_process.content['arguments']['reducer'] = cur_node.process_id
+            if parent_proc_id == 'filter_labels':
+                cur_node.parent_process.content['arguments']['condition'] = cur_node.process_id
+
         if cur_node.process_id in PROCS_WITH_VARS:
             cur_node.content['arguments']['function'] = extra_func_utils.get_func_name(cur_node.id)
             extra_func[extra_func_utils.get_dict_key(cur_node.id)][f"return_{cur_node.id}"] = f"    return _{kwargs.pop('result_node')}\n\n"

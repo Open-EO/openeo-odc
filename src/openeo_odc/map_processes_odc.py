@@ -103,6 +103,8 @@ def map_load_result(id, process) -> str:
                     highLon     = np.max([[el[0] for el in polygon[0]]])
                     params['x'] = (lowLon,highLon)
                     params['y'] = (lowLat,highLat)
+            if 'crs' in process['arguments']['spatial_extent']:
+                params['crs'] = process['arguments']['spatial_extent']['crs']
 
     if 'temporal_extent' in process['arguments']:
         params['time'] = []
@@ -116,8 +118,6 @@ def map_load_result(id, process) -> str:
             if process['arguments']['temporal_extent'][1] is not None:
                 timeEnd = process['arguments']['temporal_extent'][1]
             params['time'] = [timeStart,exclusive_date(timeEnd)]
-    if 'crs' in process['arguments']['spatial_extent']:
-        params['crs'] = process['arguments']['spatial_extent']['crs']
 
     if 'bands' in process['arguments'] and process['arguments']['bands'] is not None and len(process['arguments']['bands'])>0:
         params['measurements'] = []
@@ -142,9 +142,9 @@ def map_general(id, process, kwargs=None, donot_map_params: List[str] = None) ->
     params = deepcopy(process['arguments'])
     from_param = kwargs['from_parameter'] if kwargs and 'from_parameter' in kwargs else None
     if 'result_node' in kwargs: #if result_node is in kwargs, data must always be in params
-        if process_name != 'merge_cubes':
+        if process_name not in ['merge_cubes', 'apply_dimension', 'aggregate_temporal_period', 'filter_labels']:
             params['data'] = '_' + kwargs['result_node']
-        if process_name not in ['apply', 'fit_curve', 'predict_curve', 'merge_cubes']:
+        if process_name not in ['apply', 'fit_curve', 'predict_curve', 'merge_cubes', 'apply_dimension', 'aggregate_temporal_period', 'filter_labels']:
             params['reducer'] = {}
         _ = kwargs.pop('result_node', None)
     for key in params:
