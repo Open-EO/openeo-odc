@@ -17,7 +17,7 @@ def map_to_odc(graph, odc_env, odc_url):
         parent_proc_id = cur_node.parent_process.process_id if cur_node.parent_process else None
 
         kwargs = {}
-        kwargs['from_parameter'] = resolve_from_parameter(cur_node)
+        kwargs['fcreate_job_headerom_parameter'] = resolve_from_parameter(cur_node)
         if len(cur_node.result_processes) == 1:
             kwargs['result_node'] = cur_node.result_processes[0].id
         if cur_node.parent_process: #parent process can be eiter reduce_dimension or apply
@@ -71,6 +71,7 @@ def map_to_odc(graph, odc_env, odc_url):
         'header': create_job_header(odc_env_collection=odc_env, dask_url=odc_url),
         **final_fc,
         **nodes,
+        'tail': create_job_tail(),
     }
 
 
@@ -110,15 +111,25 @@ def resolve_from_parameter(node):
     return in_nodes
 
 
-def create_job_header(dask_url: str, odc_env_collection: str = "default", odc_env_user_gen: str = "user_generated"):
+def create_job_header(dask_url: str, odc_env_collection: str = "default", odc_env_user_gen: str = "user_generated", job_id: str = "Unassigned", user_id: str = "Unassigned"):
     """Create job imports."""
-    return f"""from dask.distributed import Client
+    return f"""from dask_gateway import Gateway
 import datacube
 import openeo_processes as oeop
 
 # Initialize ODC instance
 cube = datacube.Datacube(app='collection', env='{odc_env_collection}')
 cube_user_gen = datacube.Datacube(app='user_gen', env='{odc_env_user_gen}')
-# Connect to Dask Scheduler
-client = Client('{dask_url}')
+# Connect to the gateway
+gateway = Gateway('{dask_url}')
+options = gateway.cluster_options()
+options.user_id = user_id
+options.job_id = job_id
+cluster = gateway.new_cluster(options)
+cluster.scale(2)
+client = cluster.get_client()
 """
+
+def create_job_tail():
+    """Ensure shutdown of cluster"""
+    return f"""cluster.shutdown()"""
