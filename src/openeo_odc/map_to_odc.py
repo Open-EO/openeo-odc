@@ -6,7 +6,7 @@ from openeo_odc.map_processes_odc import map_general, map_load_collection, map_l
 from openeo_odc.utils import ExtraFuncUtils, PROCS_WITH_VARS
 
 
-def map_to_odc(graph, odc_env, odc_url):
+def map_to_odc(graph, odc_env, odc_url, job_id, user_id):
     """Map openEO process graph to xarray/opendatacube functions."""
     extra_func_utils = ExtraFuncUtils()
 
@@ -68,7 +68,7 @@ def map_to_odc(graph, odc_env, odc_url):
     for fc_proc in extra_func.values():
         final_fc.update(**fc_proc)
     return {
-        'header': create_job_header(odc_env_collection=odc_env, dask_url=odc_url),
+        'header': create_job_header(odc_env_collection=odc_env, dask_url=odc_url, job_id=job_id, user_id=user_id),
         **final_fc,
         **nodes,
         'tail': create_job_tail(),
