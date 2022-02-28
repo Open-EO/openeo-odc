@@ -123,8 +123,8 @@ cube_user_gen = datacube.Datacube(app='user_gen', env='{odc_env_user_gen}')
 # Connect to the gateway
 gateway = Gateway('{dask_url}')
 options = gateway.cluster_options()
-options.user_id = user_id
-options.job_id = job_id
+options.user_id = {user_id}
+options.job_id = {job_id}
 cluster = gateway.new_cluster(options)
 cluster.scale(2)
 client = cluster.get_client()
