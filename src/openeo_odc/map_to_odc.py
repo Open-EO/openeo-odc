@@ -52,6 +52,8 @@ def map_to_odc(graph, odc_env, odc_url, job_id, user_id):
         else:
             raise ValueError(f"Node {cur_node.id} with arguments {cur_node.arguments.keys()} could not be mapped!")
 
+        if " 'fcreate_job_headerom_parameter': {}," in cur_node_content:
+            cur_node_content = cur_node_content.replace(" 'fcreate_job_headerom_parameter': {},", '')
         # Handle fit_curve / predict_curve sub-process-graph
         if cur_node.parent_process and parent_proc_id in PROCS_WITH_VARS:
             fc_id = cur_node.parent_process.id
