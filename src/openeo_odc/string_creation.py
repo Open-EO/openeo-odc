@@ -66,4 +66,10 @@ def create_param_string(dict_input: dict, process_name: str):
     if dict_input:
         replace_str += ', '
 
-    return f"**{dict_input}".replace('{', replace_str, 1)
+    return_string = f"**{dict_input}".replace('{', replace_str, 1)
+    problematic_string = " 'fcreate_job_headerom_parameter': {},"
+
+    if problematic_string in return_string:
+        return_string = return_string.replace(problematic_string, '')
+
+    return return_string
