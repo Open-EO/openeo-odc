@@ -82,7 +82,7 @@ def map_load_result(id, process) -> str:
     product_name = process['arguments']['id'].replace("-", "_")
     params = {
         'product': product_name,
-        'dask_chunks': {'time': 'auto', 'x': 10000, 'y': 10000},
+        'dask_chunks': {'time': 'auto', 'x': 30000, 'y': 30000},
         }
     if 'spatial_extent' in process['arguments']:
         if process['arguments']['spatial_extent'] is not None:
