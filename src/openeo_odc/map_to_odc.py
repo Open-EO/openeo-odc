@@ -132,7 +132,7 @@ options = gateway.cluster_options()
 options.user_id = '{user_id}'
 options.job_id = '{job_id}'
 cluster = gateway.new_cluster(options)
-cluster.adapt(minimum=1, maximum=4)
+cluster.adapt(minimum=1, maximum=3)
 time.sleep(60)
 client = cluster.get_client()
 """
