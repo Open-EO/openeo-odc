@@ -30,7 +30,7 @@ def map_load_collection(id, process):
 
     params = {
         'product': process['arguments']['id'],
-        'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000},
+        'dask_chunks': {'time': 'auto', 'x': 10000, 'y': 10000},
         }
     if 'spatial_extent' in process['arguments']:
         if process['arguments']['spatial_extent'] is not None:
@@ -82,7 +82,7 @@ def map_load_result(id, process) -> str:
     product_name = process['arguments']['id'].replace("-", "_")
     params = {
         'product': product_name,
-        'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000},
+        'dask_chunks': {'time': 'auto', 'x': 10000, 'y': 10000},
         }
     if 'spatial_extent' in process['arguments']:
         if process['arguments']['spatial_extent'] is not None:

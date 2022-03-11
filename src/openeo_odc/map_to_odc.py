@@ -17,7 +17,7 @@ def map_to_odc(graph, odc_env, odc_url, job_id, user_id):
         parent_proc_id = cur_node.parent_process.process_id if cur_node.parent_process else None
 
         kwargs = {}
-        kwargs['fcreate_job_headerom_parameter'] = resolve_from_parameter(cur_node)
+        kwargs['from_parameter'] = resolve_from_parameter(cur_node)
         if len(cur_node.result_processes) == 1:
             kwargs['result_node'] = cur_node.result_processes[0].id
         if cur_node.parent_process: #parent process can be eiter reduce_dimension or apply
