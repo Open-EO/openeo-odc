@@ -64,11 +64,6 @@ def map_to_odc(graph, odc_env, odc_url, job_id, user_id):
         else:
             nodes[cur_node.id] = cur_node_content
 
-    problematic_string = " 'fcreate_job_headerom_parameter': {},"
-    for node in nodes:
-        if problematic_string in node:
-            node = node.replace(problematic_string, '')
-
     final_fc = {}
     for fc_proc in extra_func.values():
         final_fc.update(**fc_proc)
