@@ -140,4 +140,4 @@ client = cluster.get_client()
 def create_job_tail():
     """Ensure shutdown of cluster"""
     return f"""cluster.shutdown()
-    gateway.close()"""
+gateway.close()"""
