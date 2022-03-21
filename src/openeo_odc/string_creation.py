@@ -2,10 +2,12 @@
 # value: parameter keys where ' should be removed from the values > so turned from string into python variable
 PROCESS_ARG_MAP = {
     'default': ['x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process', 'cube1',
-                   'cube2', 'overlap_resolver', 'labels', 'mask', 'geometries'],
+                   'cube2', 'overlap_resolver', 'labels', 'mask', 'geometries', 'predictors', 'model', 'client'],
     'rename_labels': ['data'],
     'rename_dimension': ['data'],
     'aggregate_temporal_period': ['data', 'reducer'],
+    'aggregate_spatial': ['data', 'reducer'],
+    'load_model': [],
     'filter_labels': ['data', 'condition']
 }
 
@@ -41,7 +43,7 @@ def create_param_string(dict_input: dict, process_name: str):
                             val_str += f"'{val}', "
                     inputs.append(f"'{key}': {val_str[:-2]}]")
             # in apply_dimension a callable process from oeop is needed, this converts 'mean' into 'oeop.mean'!
-            elif key in ['process', 'reducer', 'condition'] and process_name in ['apply_dimension', 'aggregate_temporal_period', 'filter_labels']:
+            elif key in ['process', 'reducer', 'condition'] and process_name in ['apply_dimension', 'aggregate_temporal_period', 'filter_labels', 'aggregate_spatial']:
                 if isinstance(value, str):
                     if value is None or value.startswith('_'):
                         inputs.append(f"'{key}': {value}")
@@ -49,6 +51,8 @@ def create_param_string(dict_input: dict, process_name: str):
                         inputs.append(f"'{key}': {value}")
                     else:
                         inputs.append(f"'{key}': oeop.{value}")
+            elif key == 'client':
+                inputs.append(f"'{key}': {value}")
             elif isinstance(value, list):
                 val_str = "["
                 for val in value:
