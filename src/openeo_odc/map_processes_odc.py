@@ -10,6 +10,9 @@ from openeo_odc.utils import get_oeop_str
 from openeo_odc.string_creation import create_param_string
 
 
+DASK_CHUNK_SIZE_X = 12114
+DASK_CHUNK_SIZE_Y = 12160
+
 def map_load_collection(id, process):
     """ Map to load_collection process for ODC datacubes.
 
@@ -30,7 +33,7 @@ def map_load_collection(id, process):
 
     params = {
         'product': process['arguments']['id'],
-        'dask_chunks': {'y': 12160,'x':12114, 'time':'auto'},
+        'dask_chunks': {'y': DASK_CHUNK_SIZE_Y,'x':DASK_CHUNK_SIZE_X, 'time':'auto'},
         }
     if 'spatial_extent' in process['arguments']:
         if process['arguments']['spatial_extent'] is not None:
@@ -82,7 +85,7 @@ def map_load_result(id, process) -> str:
     product_name = process['arguments']['id'].replace("-", "_")
     params = {
         'product': product_name,
-        'dask_chunks': {'y': 12160,'x':12114, 'time':'auto'},
+        'dask_chunks': {'y': DASK_CHUNK_SIZE_Y,'x':DASK_CHUNK_SIZE_X, 'time':'auto'},
         }
     if 'spatial_extent' in process['arguments']:
         if process['arguments']['spatial_extent'] is not None:
