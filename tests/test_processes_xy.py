@@ -182,3 +182,26 @@ def test_aggregate_temporal_period(arg_in: Dict[str, Any], arg_out: str):
     out = map_general(node_id, process_def)
 
     assert out == process_ref
+
+@pytest.mark.parametrize("arg_in,arg_out", (
+        ({'data': {'from_node': 'data'}, 'geometries': {'type': 'MultiPoint', 'coordinates': [[1, 2], [3, 4]]}, 'reducer': 'mean', 'target_dimension': 'result'}, "{'data': _data, 'reducer': oeop.mean, 'geometries': {'type': 'MultiPoint', 'coordinates': [[1, 2], [3, 4]]}, 'target_dimension': 'result'}"),
+))
+def test_aggregate_spatial(arg_in: Dict[str, Any], arg_out: str):
+    """Test conversions of aggregate_temporal_period process."""
+    node_id, process_def, process_ref = set_process(*create_params("node_aggregate_spatial", arg_in, arg_out), "aggregate_spatial")
+
+    out = map_general(node_id, process_def)
+
+    assert out == process_ref
+
+@pytest.mark.parametrize("arg_in,arg_out", (
+        ({'model': {'from_node': 'model'}, 'predictors': {'from_node': 'predictors'}}, "{'model': _model, 'predictors': _predictors, 'client': client}"),
+))
+def test_predict_random_forest(arg_in: Dict[str, Any], arg_out: str):
+    """Test conversions of aggregate_temporal_period process."""
+    node_id, process_def, process_ref = set_process(*create_params("node_predict_random_forest", arg_in, arg_out), "predict_random_forest")
+
+    out = map_general(node_id, process_def)
+
+    assert out == process_ref
+
