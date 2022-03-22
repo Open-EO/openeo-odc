@@ -1,12 +1,20 @@
-from dask.distributed import Client
+from dask_gateway import Gateway
 import datacube
 import openeo_processes as oeop
+import time
 
 # Initialize ODC instance
 cube = datacube.Datacube(app='collection', env='default')
 cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
-# Connect to Dask Scheduler
-client = Client('tcp://xx.yyy.zz.kk:8786')
+# Connect to the gateway
+gateway = Gateway('tcp://xx.yyy.zz.kk:8786')
+options = gateway.cluster_options()
+options.user_id = 'test-user'
+options.job_id = 'test-job'
+cluster = gateway.new_cluster(options)
+cluster.adapt(minimum=1, maximum=3)
+time.sleep(60)
+client = cluster.get_client()
 
 
 def extra_func_predictcurve1_12(x, *parameters):
@@ -24,11 +32,11 @@ def extra_func_predictcurve1_12(x, *parameters):
     return _add2_22
 
 
-_loadcollection1_5 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}, 'x': (11.410299, 11.413905), 'y': (46.341515, 46.343144), 'time': ['2018-09-02', '2018-12-30'], 'measurements': ['B01', 'B02', 'B03', 'B04', 'B08']})
+_loadcollection1_5 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'y': 12160, 'x': 12114, 'time': 'auto'}, 'x': (11.410299, 11.413905), 'y': (46.341515, 46.343144), 'time': ['2018-09-02', '2018-12-30'], 'measurements': ['B01', 'B02', 'B03', 'B04', 'B08']})
 
-_loadresult1_6 = oeop.load_result(odc_cube=cube_user_gen, **{'product': '241f60ca_7623_4a86_a3d7_a0199eb57233', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}})
+_loadresult1_6 = oeop.load_result(odc_cube=cube_user_gen, **{'product': '241f60ca_7623_4a86_a3d7_a0199eb57233', 'dask_chunks': {'y': 12160, 'x': 12114, 'time': 'auto'}})
 
-_loadresult2_7 = oeop.load_result(odc_cube=cube_user_gen, **{'product': '7628c410_ce6a_416d_a1e1_45f184ddbc65', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}})
+_loadresult2_7 = oeop.load_result(odc_cube=cube_user_gen, **{'product': '7628c410_ce6a_416d_a1e1_45f184ddbc65', 'dask_chunks': {'y': 12160, 'x': 12114, 'time': 'auto'}})
 _1_0 = oeop.dimension_labels(**{'data': _loadcollection1_5, 'dimension': 't'})
 _1_2 = oeop.eq(**{'x': _loadcollection1_5, 'y': 0})
 _clip1_11 = oeop.clip(**{'x': _loadcollection1_5, 'min': 0, 'max': 4000})
@@ -61,3 +69,5 @@ _reducedimension1_26 = oeop.reduce_dimension(**{'data': _power6_28, 'reducer': {
 _gt2_44 = oeop.gt(**{'x': _reducedimension1_26, 'y': _apply3_8})
 _mergecubes2_43 = oeop.merge_cubes(**{'cube2': _apply3_8, 'cube1': _reducedimension1_26, 'overlap_resolver': _gt2_44})
 _saveresult2_45 = oeop.save_result(**{'data': _mergecubes2_43, 'format': 'NetCDF', 'options': {}})
+cluster.shutdown()
+gateway.close()

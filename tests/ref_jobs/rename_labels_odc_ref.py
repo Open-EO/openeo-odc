@@ -1,12 +1,20 @@
-from dask.distributed import Client
+from dask_gateway import Gateway
 import datacube
 import openeo_processes as oeop
+import time
 
 # Initialize ODC instance
 cube = datacube.Datacube(app='collection', env='default')
 cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
-# Connect to Dask Scheduler
-client = Client('tcp://xx.yyy.zz.kk:8786')
+# Connect to the gateway
+gateway = Gateway('tcp://xx.yyy.zz.kk:8786')
+options = gateway.cluster_options()
+options.user_id = 'test-user'
+options.job_id = 'test-job'
+cluster = gateway.new_cluster(options)
+cluster.adapt(minimum=1, maximum=3)
+time.sleep(60)
+client = cluster.get_client()
 
 
 def extra_func_fitcurve1_4(x, *parameters):
@@ -38,7 +46,7 @@ def extra_func_predictcurve1_15(x, *parameters):
     return _add2_25
 
 
-_loadcollection1_0 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}, 'x': (11.411777, 11.411977), 'y': (46.342355, 46.342555000000004), 'time': ['2016-09-01', '2019-08-31'], 'measurements': ['B08']})
+_loadcollection1_0 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'y': 12160, 'x': 12114, 'time': 'auto'}, 'x': (11.411777, 11.411977), 'y': (46.342355, 46.342555000000004), 'time': ['2016-09-01', '2019-08-31'], 'measurements': ['B08']})
 _clip1_2 = oeop.clip(**{'x': _loadcollection1_0, 'max': 5000, 'min': 0})
 _apply1_1 = oeop.apply(**{'data': _clip1_2, 'process': _clip1_2})
 _dimensionlabels1_3 = oeop.dimension_labels(**{'data': _apply1_1, 'dimension': 't'})
@@ -47,3 +55,5 @@ _predictcurve1_15 = oeop.predict_curve(**{'data': _apply1_1, 'function': extra_f
 _renamelabels1_26 = oeop.rename_labels(**{'data': _predictcurve1_15, 'dimension': 'bands', 'target': ['B08_predicted']})
 _mergecubes1_27 = oeop.merge_cubes(**{'cube1': _apply1_1, 'cube2': _renamelabels1_26})
 _saveresult1_28 = oeop.save_result(**{'data': _mergecubes1_27, 'format': 'NetCDF', 'options': {}})
+cluster.shutdown()
+gateway.close()

@@ -1,14 +1,22 @@
-from dask.distributed import Client
+from dask_gateway import Gateway
 import datacube
 import openeo_processes as oeop
+import time
 
 # Initialize ODC instance
 cube = datacube.Datacube(app='collection', env='default')
 cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
-# Connect to Dask Scheduler
-client = Client('tcp://xx.yyy.zz.kk:8786')
+# Connect to the gateway
+gateway = Gateway('tcp://xx.yyy.zz.kk:8786')
+options = gateway.cluster_options()
+options.user_id = 'test-user'
+options.job_id = 'test-job'
+cluster = gateway.new_cluster(options)
+cluster.adapt(minimum=1, maximum=3)
+time.sleep(60)
+client = cluster.get_client()
 
-_dc_0 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}, 'x': (9.9, 10.0), 'y': (46.5, 46.6), 'time': ['2018-06-15T00:00:00Z', '2018-06-16T00:00:00Z'], 'measurements': ['B08', 'B04', 'B02']})
+_dc_0 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'y': 12160, 'x': 12114, 'time': 'auto'}, 'x': (9.9, 10.0), 'y': (46.5, 46.6), 'time': ['2018-06-15T00:00:00Z', '2018-06-16T00:00:00Z'], 'measurements': ['B08', 'B04', 'B02']})
 _nir_2 = oeop.array_element(**{'data': _dc_0, 'index': 0, 'dimension': 'bands'})
 _red_3 = oeop.array_element(**{'data': _dc_0, 'index': 1, 'dimension': 'bands'})
 _blue_4 = oeop.array_element(**{'data': _dc_0, 'index': 2, 'dimension': 'bands'})
@@ -22,3 +30,5 @@ _evi_1 = oeop.reduce_dimension(**{'data': _p3_10, 'dimension': 'spectral', 'redu
 _min_12 = oeop.min(**{'data': _evi_1, 'dimension': 'time'})
 _mintime_11 = oeop.reduce_dimension(**{'data': _min_12, 'dimension': 'temporal', 'reducer': {}})
 _save_13 = oeop.save_result(**{'data': _mintime_11, 'format': 'netCDF'})
+cluster.shutdown()
+gateway.close()

@@ -5,7 +5,7 @@ import pytest
 from pytest import mark
 from openeo_odc.map_processes_odc import map_general
 
-from tests.utils import create_params
+from utils import create_params
 
 
 @mark.parametrize("node_id, process_def, kwargs, process_ref",
