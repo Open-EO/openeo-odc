@@ -2,6 +2,7 @@
 
 """
 
+from locale import strcoll
 from openeo_odc.map_processes_odc import map_general, map_load_collection, map_load_result
 from openeo_odc.utils import ExtraFuncUtils, PROCS_WITH_VARS
 
@@ -111,8 +112,11 @@ def resolve_from_parameter(node):
     return in_nodes
 
 
-def create_job_header(dask_url: str, odc_env_collection: str = "default", odc_env_user_gen: str = "user_generated", job_id: str = "Unassigned", user_id: str = "Unassigned"):
+def create_job_header(dask_url: str, odc_env_collection: str = "default", odc_env_user_gen: str = "user_generated", job_id: str = None, user_id: str = None):
     """Create job imports."""
+    if (job_id == None) or (user_id == None):
+        raise TypeError("Both the job_id and user_id must be provided.")
+
     return f"""from dask_gateway import Gateway
 import datacube
 import openeo_processes as oeop
