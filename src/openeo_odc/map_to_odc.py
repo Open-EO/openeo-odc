@@ -2,7 +2,6 @@
 
 """
 
-from locale import strcoll
 from openeo_odc.map_processes_odc import map_general, map_load_collection, map_load_result
 from openeo_odc.utils import ExtraFuncUtils, PROCS_WITH_VARS
 
