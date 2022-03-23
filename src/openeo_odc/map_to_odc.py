@@ -7,9 +7,9 @@ from openeo_odc.map_processes_odc import map_general, map_load_collection, map_l
 from openeo_odc.utils import ExtraFuncUtils, PROCS_WITH_VARS
 
 
-def map_to_odc(graph, odc_env, odc_url, job_id: str = '', user_id: str = ''):
+def map_to_odc(graph, odc_env, odc_url, job_id: str = None, user_id: str = None):
     """Map openEO process graph to xarray/opendatacube functions."""
-    if (job_id == '') or (user_id == ''):
+    if (not job_id) or (not user_id):
         raise TypeError("Both the job_id and user_id must be provided.")
 
     extra_func_utils = ExtraFuncUtils()
