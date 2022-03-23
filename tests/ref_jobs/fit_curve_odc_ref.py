@@ -1,12 +1,20 @@
-from dask.distributed import Client
+from dask_gateway import Gateway
 import datacube
 import openeo_processes as oeop
+import time
 
 # Initialize ODC instance
 cube = datacube.Datacube(app='collection', env='default')
 cube_user_gen = datacube.Datacube(app='user_gen', env='user_generated')
-# Connect to Dask Scheduler
-client = Client('tcp://xx.yyy.zz.kk:8786')
+# Connect to the gateway
+gateway = Gateway('tcp://xx.yyy.zz.kk:8786')
+options = gateway.cluster_options()
+options.user_id = 'test-user'
+options.job_id = 'test-job'
+cluster = gateway.new_cluster(options)
+cluster.adapt(minimum=1, maximum=3)
+time.sleep(60)
+client = cluster.get_client()
 
 
 def extra_func_18_0(x, *parameters):
@@ -30,8 +38,10 @@ def extra_func_18_0(x, *parameters):
     return _b4mf181yp_3
 
 
-_23_20 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'time': 'auto', 'x': 1000, 'y': 1000}, 'x': (11.5381, 11.5381), 'y': (46.4868, 46.4868), 'time': ['2016-01-01T00:00:00Z', '2016-05-31T00:00:00Z'], 'measurements': []})
+_23_20 = oeop.load_collection(odc_cube=cube, **{'product': 'boa_sentinel_2', 'dask_chunks': {'y': 12160, 'x': 12114, 'time': 'auto'}, 'x': (11.5381, 11.5381), 'y': (46.4868, 46.4868), 'time': ['2016-01-01T00:00:00Z', '2016-05-31T00:00:00Z'], 'measurements': []})
 _1_19 = oeop.clip(**{'x': _23_20, 'min': 0, 'max': 4000})
 _22_18 = oeop.apply(**{'process': _1_19, 'data': _1_19, 'context': ''})
 _18_0 = oeop.fit_curve(**{'data': _22_18, 'function': extra_func_18_0, 'parameters': [1, 1, 1], 'dimension': 't'})
 _saveresult1_21 = oeop.save_result(**{'data': _18_0, 'format': 'NETCDF'})
+cluster.shutdown()
+gateway.close()

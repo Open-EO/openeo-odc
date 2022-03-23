@@ -6,8 +6,11 @@ from openeo_odc.map_processes_odc import map_general, map_load_collection, map_l
 from openeo_odc.utils import ExtraFuncUtils, PROCS_WITH_VARS
 
 
-def map_to_odc(graph, odc_env, odc_url):
+def map_to_odc(graph, odc_env, odc_url, job_id: str = None, user_id: str = None):
     """Map openEO process graph to xarray/opendatacube functions."""
+    if (not job_id) or (not user_id):
+        raise TypeError("Both the job_id and user_id must be provided.")
+
     extra_func_utils = ExtraFuncUtils()
 
     nodes = {}
@@ -68,9 +71,10 @@ def map_to_odc(graph, odc_env, odc_url):
     for fc_proc in extra_func.values():
         final_fc.update(**fc_proc)
     return {
-        'header': create_job_header(odc_env_collection=odc_env, dask_url=odc_url),
+        'header': create_job_header(odc_env_collection=odc_env, dask_url=odc_url, job_id=job_id, user_id=user_id),
         **final_fc,
         **nodes,
+        'tail': create_job_tail(),
     }
 
 
@@ -110,15 +114,28 @@ def resolve_from_parameter(node):
     return in_nodes
 
 
-def create_job_header(dask_url: str, odc_env_collection: str = "default", odc_env_user_gen: str = "user_generated"):
+def create_job_header(dask_url: str, job_id: str, user_id: str, odc_env_collection: str = "default", odc_env_user_gen: str = "user_generated"):
     """Create job imports."""
-    return f"""from dask.distributed import Client
+    return f"""from dask_gateway import Gateway
 import datacube
 import openeo_processes as oeop
+import time
 
 # Initialize ODC instance
 cube = datacube.Datacube(app='collection', env='{odc_env_collection}')
 cube_user_gen = datacube.Datacube(app='user_gen', env='{odc_env_user_gen}')
-# Connect to Dask Scheduler
-client = Client('{dask_url}')
+# Connect to the gateway
+gateway = Gateway('{dask_url}')
+options = gateway.cluster_options()
+options.user_id = '{user_id}'
+options.job_id = '{job_id}'
+cluster = gateway.new_cluster(options)
+cluster.adapt(minimum=1, maximum=3)
+time.sleep(60)
+client = cluster.get_client()
 """
+
+def create_job_tail():
+    """Ensure shutdown of cluster"""
+    return f"""cluster.shutdown()
+gateway.close()"""

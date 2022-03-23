@@ -6,8 +6,7 @@ from typing import Tuple, Any, Dict
 import pytest
 from openeo_odc.map_processes_odc import map_general
 
-from tests.utils import create_params, set_process
-
+from utils import create_params, set_process
 
 @pytest.fixture(
     params=[

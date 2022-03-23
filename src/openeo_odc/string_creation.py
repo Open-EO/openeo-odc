@@ -70,4 +70,6 @@ def create_param_string(dict_input: dict, process_name: str):
     if dict_input:
         replace_str += ', '
 
-    return f"**{dict_input}".replace('{', replace_str, 1)
+    return_string = f"**{dict_input}".replace('{', replace_str, 1)
+
+    return return_string

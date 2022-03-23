@@ -29,7 +29,7 @@ def test_job(job_name: str):
                                     process_defs).sort(by='result')
     # Check if process graph is valid
     validate_processes(graph, process_defs)
-    nodes = map_to_odc(graph, odc_env, odc_url)
+    nodes = map_to_odc(graph, odc_env, odc_url, job_id='test-job', user_id='test-user')
 
     # Write to disk
     job_file = f"{job_name}_odc"
