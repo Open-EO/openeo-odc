@@ -7,7 +7,8 @@ PROCESS_ARG_MAP = {
     'rename_dimension': ['data'],
     'aggregate_temporal_period': ['data', 'reducer'],
     'aggregate_spatial': ['data', 'reducer', 'geometries'],
-    'load_model': [],
+    'load_model': ['model'],
+    'load_vector_cube': ['URL', 'job_id'],
     'filter_labels': ['data', 'condition']
 }
 
@@ -29,7 +30,7 @@ def create_param_string(dict_input: dict, process_name: str):
             to_remove.append(key)
             # label can hold node references and datetime stings > this extra handling is required
             # geometries can hold node references or URL strings
-            if key == 'labels' or key == 'geometries':
+            if key in ['labels', 'geometries', 'model', 'URL', 'job_id']:
                 if isinstance(value, str) or value is None:
                    if value is None or value.startswith('_'):
                        inputs.append(f"'{key}': {value}")
