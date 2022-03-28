@@ -6,7 +6,7 @@ PROCESS_ARG_MAP = {
     'rename_labels': ['data'],
     'rename_dimension': ['data'],
     'aggregate_temporal_period': ['data', 'reducer'],
-    'aggregate_spatial': ['data', 'reducer'],
+    'aggregate_spatial': ['data', 'reducer', 'geometries'],
     'load_model': [],
     'filter_labels': ['data', 'condition']
 }
