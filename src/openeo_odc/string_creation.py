@@ -2,7 +2,7 @@
 # value: parameter keys where ' should be removed from the values > so turned from string into python variable
 PROCESS_ARG_MAP = {
     'default': ['x', 'y', 'data', 'value', 'base', 'p', 'target', 'parameters', 'function', 'process', 'cube1',
-                   'cube2', 'overlap_resolver', 'labels', 'mask', 'geometries', 'predictors', 'model', 'client'],
+                   'cube2', 'overlap_resolver', 'labels', 'mask', 'geometries', 'predictors', 'model', 'id', 'client'],
     'rename_labels': ['data'],
     'rename_dimension': ['data'],
     'aggregate_temporal_period': ['data', 'reducer'],
@@ -30,7 +30,7 @@ def create_param_string(dict_input: dict, process_name: str):
             to_remove.append(key)
             # label can hold node references and datetime stings > this extra handling is required
             # geometries can hold node references or URL strings
-            if key in ['labels', 'geometries', 'id', 'URL', 'job_id']:
+            if key in ['labels', 'geometries', 'id', 'model', 'URL', 'job_id']:
                 if isinstance(value, str) or value is None:
                    if value is None or value.startswith('_'):
                        inputs.append(f"'{key}': {value}")
