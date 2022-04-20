@@ -28,7 +28,8 @@ def map_to_odc(graph, odc_env, odc_url, job_id: str = None, user_id: str = None)
                 # in apply and reduce_dimension the process is the node of the child process
                 kwargs['dimension'] = cur_node.parent_process.content['arguments']['dimension']
                 if 'context' in cur_node.parent_process.content['arguments']:
-                    kwargs['context'] = cur_node.parent_process.content['arguments']['context']
+                    if 'from_node' in cur_node.parent_process.content['arguments']['context']:
+                        kwargs['context'] = '_' + cur_node.parent_process.content['arguments']['context']['from_node']
             if parent_proc_id == 'apply_dimension':
                 # in apply_dimension the process should be a callable process, for example 'mean'.
                 # the 'mean' gets transformed to 'oeop.mean' in the string_creation.create_param_string function.
