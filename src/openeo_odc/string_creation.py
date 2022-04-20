@@ -30,7 +30,7 @@ def create_param_string(dict_input: dict, process_name: str):
             to_remove.append(key)
             # label can hold node references and datetime stings > this extra handling is required
             # geometries can hold node references or URL strings
-            if key in ['labels', 'geometries', 'id', 'model', 'URL', 'job_id']:
+            if key in ['labels', 'geometries', 'id', 'model', 'URL', 'job_id', 'context']:
                 if isinstance(value, str) or value is None:
                    if value is None or value.startswith('_'):
                        inputs.append(f"'{key}': {value}")
