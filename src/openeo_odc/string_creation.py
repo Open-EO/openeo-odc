@@ -44,6 +44,9 @@ def create_param_string(dict_input: dict, process_name: str):
                         else:
                             val_str += f"'{val}', "
                     inputs.append(f"'{key}': {val_str[:-2]}]")
+                elif isinstance(value,dict):
+                    inputs.append(f"'{key}': {str(value)}")
+
             # in apply_dimension a callable process from oeop is needed, this converts 'mean' into 'oeop.mean'!
             elif key in ['process', 'reducer', 'condition'] and process_name in ['apply_dimension', 'aggregate_temporal_period', 'filter_labels', 'aggregate_spatial']:
                 if isinstance(value, str):
