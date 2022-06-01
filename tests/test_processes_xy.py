@@ -183,7 +183,7 @@ def test_aggregate_temporal_period(arg_in: Dict[str, Any], arg_out: str):
     assert out == process_ref
 
 @pytest.mark.parametrize("arg_in,arg_out", (
-        ({'data': {'from_node': 'data'}, 'geometries': {'type': 'MultiPoint', 'coordinates': [[1, 2], [3, 4]]}, 'reducer': 'mean', 'target_dimension': 'result'}, "{'data': _data, 'reducer': oeop.mean, 'geometries': {'type': 'MultiPoint', 'coordinates': [[1, 2], [3, 4]]}, 'target_dimension': 'result'}"),
+        ({'data': {'from_node': 'data'}, 'geometries': {'type': 'MultiPoint', 'coordinates': [[1, 2], [3, 4]]}, 'reducer': 'mean', 'target_dimension': 'result'}, "{'data': _data, 'geometries': {'type': 'MultiPoint', 'coordinates': [[1, 2], [3, 4]]}, 'reducer': oeop.mean, 'target_dimension': 'result'}"),
 ))
 def test_aggregate_spatial(arg_in: Dict[str, Any], arg_out: str):
     """Test conversions of aggregate_temporal_period process."""
